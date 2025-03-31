@@ -29,6 +29,22 @@
       "dest": "/api/events/index.js"
     },
     {
+      "src": "/api/employee-recognition",
+      "dest": "/api/employee-recognition/index.js"
+    },
+    {
+      "src": "/api/employee-recognition/(.*)",
+      "dest": "/api/employee-recognition/index.js"
+    },
+    {
+      "src": "/api/private-pilot",
+      "dest": "/api/private-pilot/index.js"
+    },
+    {
+      "src": "/api/private-pilot/(.*)",
+      "dest": "/api/private-pilot/index.js"
+    },
+    {
       "src": "/api/power-automate",
       "dest": "/api/power-automate/index.js"
     },

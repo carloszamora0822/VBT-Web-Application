@@ -3,20 +3,30 @@ import FlightForm from './components/FlightForm';
 import FlightList from './components/FlightList';
 import EventForm from './components/EventForm';
 import EventList from './components/EventList';
+import EmployeeRecognitionForm from './components/EmployeeRecognitionForm';
+import PrivatePilotForm from './components/PrivatePilotForm';
 
 console.log('[FILE USED] /client/src/App.js');
 
 function App() {
   const [flights, setFlights] = useState([]);
   const [events, setEvents] = useState([]);
+  const [employeeRecognition, setEmployeeRecognition] = useState(null);
+  const [privatePilot, setPrivatePilot] = useState(null);
   const [lastFlightUpdate, setLastFlightUpdate] = useState(null);
   const [lastEventUpdate, setLastEventUpdate] = useState(null);
+  const [lastEmployeeUpdate, setLastEmployeeUpdate] = useState(null);
+  const [lastPilotUpdate, setLastPilotUpdate] = useState(null);
   const [isUpdatingFlights, setIsUpdatingFlights] = useState(false);
   const [isUpdatingEvents, setIsUpdatingEvents] = useState(false);
+  const [isUpdatingEmployee, setIsUpdatingEmployee] = useState(false);
+  const [isUpdatingPilot, setIsUpdatingPilot] = useState(false);
 
   useEffect(() => {
     fetchFlights();
     fetchEvents();
+    fetchEmployeeRecognition();
+    fetchPrivatePilot();
   }, []);
 
   // Flight-related functions
@@ -297,6 +307,220 @@ function App() {
     }
   };
 
+  // Employee Recognition functions
+  const fetchEmployeeRecognition = async () => {
+    try {
+      console.log('Fetching employee recognition...');
+      const response = await fetch('/api/employee-recognition');
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from employee recognition API: ${response.status} - ${errorText}`);
+        return; // Don't update state if we got an error response
+      }
+      
+      const data = await response.json();
+      console.log('Fetched employee recognition:', data);
+      
+      if (data && data.name !== undefined) {
+        setEmployeeRecognition(data);
+        if (data.name) setLastEmployeeUpdate(new Date());
+      } else {
+        console.error('Unexpected data format from employee recognition API:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching employee recognition:', error);
+      // Continue with current state - don't clear existing data on error
+    }
+  };
+
+  const addEmployeeRecognition = async (employee) => {
+    try {
+      console.log('Adding employee recognition:', employee);
+      const response = await fetch('/api/employee-recognition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(employee)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from employee recognition API: ${response.status} - ${errorText}`);
+        return { success: false, message: `Server error: ${response.status}` };
+      }
+      
+      const data = await response.json();
+      console.log('Add employee recognition response:', data);
+      
+      // Update the state with the new data
+      if (data.success && data.employee) {
+        setEmployeeRecognition(data.employee);
+        setLastEmployeeUpdate(new Date());
+      }
+      return data;
+    } catch (error) {
+      console.error('Error adding employee recognition:', error);
+      // Return a standardized error response object
+      return { 
+        success: false, 
+        message: 'Failed to connect to server. Please try again later.',
+        error: error.message
+      };
+    }
+  };
+
+  const updateVestaboardWithEmployee = async () => {
+    try {
+      console.log('Updating Vestaboard with employee recognition...');
+      setIsUpdatingEmployee(true);
+      
+      // Check if we have employee to update
+      if (!employeeRecognition || !employeeRecognition.name) {
+        alert('No employee recognition available to send to Vestaboard');
+        setIsUpdatingEmployee(false);
+        return;
+      }
+      
+      const response = await fetch('/api/employee-recognition', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          updateVestaboardOnly: true  // Flag to indicate we're just updating the Vestaboard
+        })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from employee recognition API: ${response.status} - ${errorText}`);
+        alert(`Failed to update Vestaboard: ${errorText}`);
+        setIsUpdatingEmployee(false);
+        return;
+      }
+      
+      const data = await response.json();
+      console.log('Update Vestaboard with employee recognition response:', data);
+      
+      if (data.success) {
+        setLastEmployeeUpdate(new Date());
+        alert('Vestaboard updated with employee recognition successfully');
+      } else {
+        alert('Failed to update Vestaboard: ' + (data.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error updating Vestaboard with employee recognition:', error);
+      alert('Error updating Vestaboard. Please try again later.');
+    } finally {
+      setIsUpdatingEmployee(false);
+    }
+  };
+
+  // Private Pilot functions
+  const fetchPrivatePilot = async () => {
+    try {
+      console.log('Fetching private pilot...');
+      const response = await fetch('/api/private-pilot');
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from private pilot API: ${response.status} - ${errorText}`);
+        return; // Don't update state if we got an error response
+      }
+      
+      const data = await response.json();
+      console.log('Fetched private pilot:', data);
+      
+      if (data && data.name !== undefined) {
+        setPrivatePilot(data);
+        if (data.name) setLastPilotUpdate(new Date());
+      } else {
+        console.error('Unexpected data format from private pilot API:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching private pilot:', error);
+      // Continue with current state - don't clear existing data on error
+    }
+  };
+
+  const addPrivatePilot = async (pilot) => {
+    try {
+      console.log('Adding private pilot:', pilot);
+      const response = await fetch('/api/private-pilot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pilot)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from private pilot API: ${response.status} - ${errorText}`);
+        return { success: false, message: `Server error: ${response.status}` };
+      }
+      
+      const data = await response.json();
+      console.log('Add private pilot response:', data);
+      
+      // Update the state with the new data
+      if (data.success && data.pilot) {
+        setPrivatePilot(data.pilot);
+        setLastPilotUpdate(new Date());
+      }
+      return data;
+    } catch (error) {
+      console.error('Error adding private pilot:', error);
+      // Return a standardized error response object
+      return { 
+        success: false, 
+        message: 'Failed to connect to server. Please try again later.',
+        error: error.message
+      };
+    }
+  };
+
+  const updateVestaboardWithPilot = async () => {
+    try {
+      console.log('Updating Vestaboard with private pilot...');
+      setIsUpdatingPilot(true);
+      
+      // Check if we have pilot to update
+      if (!privatePilot || !privatePilot.name) {
+        alert('No private pilot available to send to Vestaboard');
+        setIsUpdatingPilot(false);
+        return;
+      }
+      
+      const response = await fetch('/api/private-pilot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          updateVestaboardOnly: true  // Flag to indicate we're just updating the Vestaboard
+        })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from private pilot API: ${response.status} - ${errorText}`);
+        alert(`Failed to update Vestaboard: ${errorText}`);
+        setIsUpdatingPilot(false);
+        return;
+      }
+      
+      const data = await response.json();
+      console.log('Update Vestaboard with private pilot response:', data);
+      
+      if (data.success) {
+        setLastPilotUpdate(new Date());
+        alert('Vestaboard updated with private pilot successfully');
+      } else {
+        alert('Failed to update Vestaboard: ' + (data.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error updating Vestaboard with private pilot:', error);
+      alert('Error updating Vestaboard. Please try again later.');
+    } finally {
+      setIsUpdatingPilot(false);
+    }
+  };
+
   // Helper functions for formatting
   const formatUpdateTime = (time) => {
     if (!time) return 'Never';
@@ -358,6 +582,46 @@ function App() {
             events={events} 
             deleteEvent={deleteEvent}
           />
+        </div>
+      </div>
+      
+      <div className="dashboard secondary-dashboard">
+        {/* Employee Recognition Panel */}
+        <div className="panel employee-panel">
+          <h2>Employee Recognition</h2>
+          <div className="status-section">
+            <p>Last Vestaboard update: {formatUpdateTime(lastEmployeeUpdate)}</p>
+            <p className="current-value">
+              Current Employee: {employeeRecognition?.name || 'None'}
+            </p>
+            <button 
+              onClick={updateVestaboardWithEmployee} 
+              disabled={isUpdatingEmployee || !employeeRecognition?.name}
+              className="submit-btn"
+            >
+              {isUpdatingEmployee ? 'Updating...' : 'Update Vestaboard with Employee'}
+            </button>
+          </div>
+          <EmployeeRecognitionForm addEmployeeRecognition={addEmployeeRecognition} />
+        </div>
+        
+        {/* Private Pilot Panel */}
+        <div className="panel pilot-panel">
+          <h2>Private Pilot</h2>
+          <div className="status-section">
+            <p>Last Vestaboard update: {formatUpdateTime(lastPilotUpdate)}</p>
+            <p className="current-value">
+              Current Pilot: {privatePilot?.name || 'None'}
+            </p>
+            <button 
+              onClick={updateVestaboardWithPilot} 
+              disabled={isUpdatingPilot || !privatePilot?.name}
+              className="submit-btn"
+            >
+              {isUpdatingPilot ? 'Updating...' : 'Update Vestaboard with Pilot'}
+            </button>
+          </div>
+          <PrivatePilotForm addPrivatePilot={addPrivatePilot} />
         </div>
       </div>
     </div>

@@ -59,7 +59,40 @@ code {
   padding-bottom: 10px;
 }
 
+/* Secondary Dashboard Styles */
+.secondary-dashboard {
+  margin-top: 20px;
+  background-color: #f0f4f8;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.employee-panel, .pilot-panel {
+  background-color: white;
+  height: 100%;
+}
+
+.current-value {
+  font-weight: bold;
+  background-color: #e8eff7;
+  padding: 10px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
 /* Form Styles */
+.form-container {
+  background-color: #e8eff7;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.form-container h3 {
+  margin-top: 0;
+  color: #1d3557;
+}
+
 .form {
   background-color: #e8eff7;
   padding: 15px;
@@ -199,43 +232,35 @@ code {
 .status-section {
   background-color: #f8f9fa;
   padding: 15px;
-  margin-bottom: 20px;
   border-radius: 5px;
-  border: 1px solid #dee2e6;
+  margin-bottom: 20px;
 }
 
 .status-section p {
   margin: 5px 0;
 }
 
-.status-section .note {
-  font-size: 0.85rem;
+.note {
+  font-size: 0.9rem;
   color: #6c757d;
   font-style: italic;
 }
 
-.status-section .submit-btn {
-  margin-top: 10px;
-  background-color: #1e88e5;
-}
-
-.status-section .submit-btn:hover {
-  background-color: #1565c0;
-}
-
-.note {
-  font-size: 12px;
-  color: #c5c5c5;
-  font-style: italic;
-}
-
-/* Responsive design */
+/* Responsive styling */
 @media (max-width: 768px) {
   .dashboard {
     flex-direction: column;
   }
-
+  
   .panel {
+    width: 100%;
+  }
+  
+  .form-row {
+    flex-direction: column;
+  }
+  
+  .form-group.half-width {
     width: 100%;
   }
 }
