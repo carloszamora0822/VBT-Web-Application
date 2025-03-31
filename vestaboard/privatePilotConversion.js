@@ -65,7 +65,7 @@ export function createPrivatePilotMatrix(pilotName) {
     [63, 63, 63, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 63, 63, 63],
     [0, 63, 63, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 63, 63, 0],
     [0, 0, 63, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 63, 0, 0],
-    [0, 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 0, 0],
+    [0, 0, 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 0, 0, 0],
     [0, 0, 0, 0, 67, 67, 67, 67, 67, 67, 67, 67, 67, 67, 67, 67, 67, 67, 0, 0, 0, 0]
   ];
   
@@ -84,7 +84,7 @@ export function createPrivatePilotMatrix(pilotName) {
   for (let i = 0; i < vbtsCodes.length; i++) {
     // Fix apostrophe character - replace code 49 (semicolon) with 52 (apostrophe) 
     if (vbtsCodes[i] === 49) 
-      {
+    {
       matrix[2][i + 4] = 52;  // Use proper apostrophe code
     } else 
     {
