@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "build" }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/flights",
+      "dest": "/api/flights/index.js"
+    },
+    {
+      "src": "/api/flights/(.*)",
+      "dest": "/api/flights/index.js"
+    },
+    {
+      "src": "/api/events",
+      "dest": "/api/events/index.js"
+    },
+    {
+      "src": "/api/events/(.*)",
+      "dest": "/api/events/index.js"
+    },
+    {
+      "src": "/api/power-automate",
+      "dest": "/api/power-automate/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/$1"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
