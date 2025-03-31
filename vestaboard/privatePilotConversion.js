@@ -82,7 +82,14 @@ export function createPrivatePilotMatrix(pilotName) {
   const vbtsText = "VBT'S";
   const vbtsCodes = stringToVestaCodes(centerString(vbtsText, 14));
   for (let i = 0; i < vbtsCodes.length; i++) {
-    matrix[2][i + 4] = vbtsCodes[i];
+    // Fix apostrophe character - replace code 49 (semicolon) with 52 (apostrophe) 
+    if (vbtsCodes[i] === 49) 
+      {
+      matrix[2][i + 4] = 52;  // Use proper apostrophe code
+    } else 
+    {
+      matrix[2][i + 4] = vbtsCodes[i];
+    }
   }
   
   // Add "NEWEST" to row 3
