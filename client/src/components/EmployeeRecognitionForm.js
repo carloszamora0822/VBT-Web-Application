@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 
 function EmployeeRecognitionForm({ addEmployeeRecognition }) {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -9,8 +10,13 @@ function EmployeeRecognitionForm({ addEmployeeRecognition }) {
     e.preventDefault();
     
     // Validate input
-    if (!name.trim()) {
-      setError('Employee name is required');
+    if (!firstName.trim()) {
+      setError('First name is required');
+      return;
+    }
+
+    if (!lastName.trim()) {
+      setError('Last name is required');
       return;
     }
     
@@ -19,11 +25,16 @@ function EmployeeRecognitionForm({ addEmployeeRecognition }) {
     
     try {
       // Submit data to parent component
-      const result = await addEmployeeRecognition({ name, updateVestaboard: false });
+      const result = await addEmployeeRecognition({ 
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        updateVestaboard: false
+      });
       
       if (result.success) {
         // Clear form on success
-        setName('');
+        setFirstName('');
+        setLastName('');
       } else {
         setError(result.message || 'Failed to add employee recognition');
       }
@@ -41,13 +52,25 @@ function EmployeeRecognitionForm({ addEmployeeRecognition }) {
       
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label htmlFor="employee-name">Employee Name:</label>
+          <label htmlFor="employee-first-name">First Name:</label>
           <input
-            id="employee-name"
+            id="employee-first-name"
             type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Enter employee name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            placeholder="Enter first name"
+            disabled={isSubmitting}
+          />
+        </div>
+        
+        <div className="form-group">
+          <label htmlFor="employee-last-name">Last Name:</label>
+          <input
+            id="employee-last-name"
+            type="text"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            placeholder="Enter last name"
             disabled={isSubmitting}
           />
         </div>

@@ -11,7 +11,7 @@ console.log('[FILE USED] /client/src/App.js');
 function App() {
   const [flights, setFlights] = useState([]);
   const [events, setEvents] = useState([]);
-  const [employeeRecognition, setEmployeeRecognition] = useState(null);
+  const [employeeRecognition, setEmployeeRecognition] = useState({ firstName: '', lastName: '' });
   const [privatePilot, setPrivatePilot] = useState(null);
   const [lastFlightUpdate, setLastFlightUpdate] = useState(null);
   const [lastEventUpdate, setLastEventUpdate] = useState(null);
@@ -322,9 +322,9 @@ function App() {
       const data = await response.json();
       console.log('Fetched employee recognition:', data);
       
-      if (data && data.name !== undefined) {
+      if (data && data.firstName !== undefined && data.lastName !== undefined) {
         setEmployeeRecognition(data);
-        if (data.name) setLastEmployeeUpdate(new Date());
+        if (data.firstName || data.lastName) setLastEmployeeUpdate(new Date());
       } else {
         console.error('Unexpected data format from employee recognition API:', data);
       }
@@ -375,7 +375,7 @@ function App() {
       setIsUpdatingEmployee(true);
       
       // Check if we have employee to update
-      if (!employeeRecognition || !employeeRecognition.name) {
+      if (!employeeRecognition || !employeeRecognition.firstName || !employeeRecognition.lastName) {
         alert('No employee recognition available to send to Vestaboard');
         setIsUpdatingEmployee(false);
         return;
@@ -531,6 +531,12 @@ function App() {
     });
   };
 
+  // Format full name from first and last name
+  const formatFullName = (firstName, lastName) => {
+    if (!firstName && !lastName) return 'None';
+    return `${firstName} ${lastName}`.trim();
+  };
+
   return (
     <div className="App">
       <header className="app-header">
@@ -592,11 +598,11 @@ function App() {
           <div className="status-section">
             <p>Last Vestaboard update: {formatUpdateTime(lastEmployeeUpdate)}</p>
             <p className="current-value">
-              Current Employee: {employeeRecognition?.name || 'None'}
+              Current Employee: {formatFullName(employeeRecognition?.firstName, employeeRecognition?.lastName)}
             </p>
             <button 
               onClick={updateVestaboardWithEmployee} 
-              disabled={isUpdatingEmployee || !employeeRecognition?.name}
+              disabled={isUpdatingEmployee || !employeeRecognition?.firstName || !employeeRecognition?.lastName}
               className="submit-btn"
             >
               {isUpdatingEmployee ? 'Updating...' : 'Update Vestaboard with Employee'}

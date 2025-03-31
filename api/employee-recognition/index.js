@@ -25,7 +25,8 @@ async function loadEmployeeRecognition() {
         
         // Return the record if found, or null if not
         return record ? {
-            name: record.name || ''
+            firstName: record.firstName || '',
+            lastName: record.lastName || ''
         } : null;
     } catch (error) {
         console.error('Error loading employee recognition from MongoDB:', error);
@@ -46,9 +47,10 @@ async function saveEmployeeRecognition(employee) {
         // Clear existing record and insert new one
         await collection.deleteMany({});
         
-        if (employee && employee.name) {
+        if (employee && employee.firstName && employee.lastName) {
             await collection.insertOne({
-                name: employee.name,
+                firstName: employee.firstName,
+                lastName: employee.lastName,
                 createdAt: new Date()
             });
         }
@@ -80,12 +82,12 @@ async function updateVestaboardWithEmployee(employee) {
         isUpdatingVestaboard = true;
         console.log('Starting Vestaboard update with employee recognition:', JSON.stringify(employee));
 
-        if (!employee || !employee.name) {
-            throw new Error('Missing employee name for recognition');
+        if (!employee || !employee.firstName || !employee.lastName) {
+            throw new Error('Missing employee first or last name for recognition');
         }
 
-        // Create matrix with employee name
-        const matrix = createEmployeeRecognitionMatrix(employee.name);
+        // Create matrix with employee first and last name
+        const matrix = createEmployeeRecognitionMatrix(employee.firstName, employee.lastName);
         
         // Calculate time since last update
         const now = Date.now();
@@ -144,14 +146,14 @@ export default async function handler(req, res) {
             // Load employee recognition from database
             const employee = await loadEmployeeRecognition();
             
-            if (!employee || !employee.name) {
+            if (!employee || !employee.firstName || !employee.lastName) {
                 return res.status(400).json({ 
                     error: 'No employee recognition data found' 
                 });
             }
             
             // Create Vestaboard matrix
-            const matrix = createEmployeeRecognitionMatrix(employee.name);
+            const matrix = createEmployeeRecognitionMatrix(employee.firstName, employee.lastName);
             
             // Return the matrix
             return res.status(200).json(matrix);
@@ -167,7 +169,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
         try {
             console.log('GET request received, returning employee recognition:', employeeCache);
-            return res.status(200).json(employeeCache || { name: '' });
+            return res.status(200).json(employeeCache || { firstName: '', lastName: '' });
         } catch (error) {
             console.error('Error in GET employee recognition:', error);
             return res.status(500).json({ 
@@ -187,7 +189,7 @@ export default async function handler(req, res) {
                 // Get the current employee recognition from the database
                 const currentEmployee = await loadEmployeeRecognition();
                 
-                if (!currentEmployee || !currentEmployee.name) {
+                if (!currentEmployee || !currentEmployee.firstName || !currentEmployee.lastName) {
                     return res.status(400).json({
                         success: false,
                         message: 'No employee recognition data found to display on Vestaboard'
@@ -222,16 +224,24 @@ export default async function handler(req, res) {
             console.log('Received employee recognition update:', req.body);
             
             // Validate required fields
-            if (!req.body.name) {
+            if (!req.body.firstName) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Employee name is required'
+                    message: 'Employee first name is required'
+                });
+            }
+
+            if (!req.body.lastName) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Employee last name is required'
                 });
             }
             
             // Create employee recognition object
             const employee = {
-                name: req.body.name.trim()
+                firstName: req.body.firstName.trim(),
+                lastName: req.body.lastName.trim()
             };
             
             // Save to the database

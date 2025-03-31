@@ -55,11 +55,12 @@ function centerString(str, width) {
 
 /**
  * Generate a Vestaboard matrix for displaying employee recognition
- * @param {string} employeeName - The name of the employee to recognize
+ * @param {string} firstName - The first name of the employee to recognize
+ * @param {string} lastName - The last name of the employee to recognize
  * @returns {number[][]} - 6x22 matrix of Vestaboard character codes
  */
-export function createEmployeeRecognitionMatrix(employeeName) {
-  // Create the static template matrix
+export function createEmployeeRecognitionMatrix(firstName, lastName) {
+  // Create the static template matrix with the specific pattern
   const matrix = [
     [0, 63, 0, 67, 0, 63, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 67],
     [0, 0, 67, 63, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 67],
@@ -69,8 +70,9 @@ export function createEmployeeRecognitionMatrix(employeeName) {
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 63, 67]
   ];
   
-  // Process employee name
-  const processedName = employeeName.trim();
+  // Process employee names
+  const processedFirstName = firstName.trim();
+  const processedLastName = lastName.trim();
   
   // Add RECOGNIZE text to row 0
   const recognizeText = 'RECOGNIZE';
@@ -79,31 +81,43 @@ export function createEmployeeRecognitionMatrix(employeeName) {
     matrix[0][i + 7] = recognizeCodes[i];
   }
   
-  // Add APRIL MYERS (or employee name) to row 1
-  const nameCodes = stringToVestaCodes(centerString(processedName, 18));
-  for (let i = 0; i < nameCodes.length; i++) {
-    matrix[1][i + 2] = nameCodes[i];
+  // Row 1 - Add first name after the blue, red, blue pattern (67, 63, 67)
+  // The pattern is already set in the matrix template
+  const firstNameCodes = stringToVestaCodes(processedFirstName);
+  const firstNameStartPos = 7; // Starting after the pattern
+  for (let i = 0; i < firstNameCodes.length; i++) {
+    if (i + firstNameStartPos < 19) { // Leave room for the ending colors
+      matrix[1][i + firstNameStartPos] = firstNameCodes[i];
+    }
   }
   
-  // Add FOR ALWAYS text to row 2
+  // Row 2 - Add last name
+  const lastNameCodes = stringToVestaCodes(centerString(processedLastName, 12));
+  for (let i = 0; i < lastNameCodes.length; i++) {
+    if (i + 7 < 19) { // Leave room for the ending colors
+      matrix[2][i + 7] = lastNameCodes[i];
+    }
+  }
+  
+  // Add FOR ALWAYS text to row 3
   const forAlwaysText = 'FOR ALWAYS';
   const forAlwaysCodes = stringToVestaCodes(forAlwaysText);
   for (let i = 0; i < forAlwaysCodes.length; i++) {
-    matrix[2][i + 7] = forAlwaysCodes[i];
+    matrix[3][i + 7] = forAlwaysCodes[i];
   }
   
-  // Add GOING THE text to row 3
+  // Add GOING THE text to row 4
   const goingTheText = 'GOING THE';
   const goingTheCodes = stringToVestaCodes(goingTheText);
   for (let i = 0; i < goingTheCodes.length; i++) {
-    matrix[3][i + 7] = goingTheCodes[i];
+    matrix[4][i + 7] = goingTheCodes[i];
   }
   
-  // Add EXTRA MILE text to row 4
+  // Add EXTRA MILE text to row 5
   const extraMileText = 'EXTRA MILE';
   const extraMileCodes = stringToVestaCodes(extraMileText);
   for (let i = 0; i < extraMileCodes.length; i++) {
-    matrix[4][i + 7] = extraMileCodes[i];
+    matrix[5][i + 7] = extraMileCodes[i];
   }
   
   return matrix;
