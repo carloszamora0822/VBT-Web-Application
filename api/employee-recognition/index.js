@@ -95,7 +95,7 @@ async function updateVestaboardWithEmployee(employee) {
         
         // If it's been less than 5 seconds since the last update, wait
         if (timeSinceLastUpdate < 5000) {
-            const waitTime = 5000 - timeSinceLastUpdate;
+            const waitTime = Math.min(5000, 5000 - timeSinceLastUpdate);
             console.log(`Waiting ${waitTime}ms before updating Vestaboard to avoid rate limiting`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
         }
