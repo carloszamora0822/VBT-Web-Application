@@ -9,8 +9,6 @@ let eventsCache = [];
 
 // Flag to track if we're currently updating the Vestaboard
 let isUpdatingVestaboard = false;
-// Timestamp of the last update
-let lastUpdateTime = 0;
 
 /**
  * Load events from the database
@@ -100,25 +98,12 @@ async function updateVestaboardWithEvents(events) {
         // Create matrix with events
         const matrix = createEventMatrix([...events]);
         
-        // Calculate time since last update
-        const now = Date.now();
-        const timeSinceLastUpdate = now - lastUpdateTime;
-        
-        // If it's been less than 5 seconds since the last update, wait
-        if (timeSinceLastUpdate < 5000) {
-            const waitTime = Math.min(5000, 5000 - timeSinceLastUpdate);
-            console.log(`Waiting ${waitTime}ms before updating Vestaboard to avoid rate limiting`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-        }
-        
         try {
             // Update the Vestaboard
             const result = await updateVestaboard(matrix);
             console.log('Vestaboard update result:', JSON.stringify(result));
             
-            // Update last update time
-            lastUpdateTime = Date.now();
-            console.log('Vestaboard updated successfully at', new Date(lastUpdateTime).toISOString());
+            console.log('Vestaboard updated successfully at', new Date().toISOString());
             return true;
         } catch (vestaError) {
             console.error('Error updating Vestaboard:', vestaError);
