@@ -17,20 +17,64 @@ async function loadEvents() {
     try {
         console.log('Loading events from MongoDB...');
         const collection = await getCollection('events');
-        const events = await collection.find({}).sort({ _id: -1 }).limit(5).toArray();
+        const events = await collection.find({}).toArray();
         
         console.log(`Loaded ${events.length} events from MongoDB`);
         
         // Transform from MongoDB document to event object
-        return events.map(doc => ({
+        const eventObjects = events.map(doc => ({
+            _id: doc._id,
             date: doc.date || '',
             time: doc.time || '',
             description: doc.description || ''
         }));
+        
+        // Sort events chronologically - upcoming dates first
+        const today = new Date();
+        const currentMonth = today.getMonth() + 1; // 1-12
+        const currentDay = today.getDate();
+        
+        const sortedEvents = eventObjects.sort((a, b) => {
+            // Parse the MM/DD format
+            const [aMonth, aDay] = a.date.split('/').map(Number);
+            const [bMonth, bDay] = b.date.split('/').map(Number);
+            
+            // Calculate days until next event for each
+            let aDaysUntil = calculateDaysUntil(currentMonth, currentDay, aMonth, aDay);
+            let bDaysUntil = calculateDaysUntil(currentMonth, currentDay, bMonth, bDay);
+            
+            // Sort by days until (ascending)
+            return aDaysUntil - bDaysUntil;
+        });
+        
+        // Limit to 5 events after sorting
+        return sortedEvents.slice(0, 5);
     } catch (error) {
         console.error('Error loading events from MongoDB:', error);
         return []; // Return empty array on error
     }
+}
+
+/**
+ * Calculate days until the next occurrence of a month/day
+ * @param {number} currentMonth Current month (1-12)
+ * @param {number} currentDay Current day (1-31)
+ * @param {number} targetMonth Target month (1-12)
+ * @param {number} targetDay Target day (1-31)
+ * @returns {number} Days until next occurrence
+ */
+function calculateDaysUntil(currentMonth, currentDay, targetMonth, targetDay) {
+    const today = new Date();
+    const targetDate = new Date(today.getFullYear(), targetMonth - 1, targetDay);
+    
+    // If the date has already occurred this year, use next year's date
+    if (targetMonth < currentMonth || (targetMonth === currentMonth && targetDay < currentDay)) {
+        targetDate.setFullYear(today.getFullYear() + 1);
+    }
+    
+    // Calculate the difference in days
+    const differenceMs = targetDate - today;
+    return Math.floor(differenceMs / (1000 * 60 * 60 * 24));
 }
 
 /**

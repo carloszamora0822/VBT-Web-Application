@@ -15,21 +15,48 @@ async function loadFlights() {
     try {
         console.log('Loading flights from MongoDB...');
         const collection = await getCollection('flights');
-        const flights = await collection.find({}).sort({ _id: -1 }).limit(10).toArray();
+        const flights = await collection.find({}).toArray();
         
         console.log(`Loaded ${flights.length} flights from MongoDB`);
         
         // Transform from MongoDB document to flight object
-        return flights.map(doc => ({
+        const flightObjects = flights.map(doc => ({
+            _id: doc._id,
             time: doc.time || '',
             callsign: doc.callsign || '',
             type: doc.type || '',
             destination: doc.destination || ''
         }));
+        
+        // Sort flights chronologically by time
+        const sortedFlights = flightObjects.sort((a, b) => {
+            // Convert time (HH:MM format) to minutes for comparison
+            const aMinutes = timeToMinutes(a.time);
+            const bMinutes = timeToMinutes(b.time);
+            
+            // Sort by time (ascending)
+            return aMinutes - bMinutes;
+        });
+        
+        // Limit to 10 flights after sorting
+        return sortedFlights.slice(0, 10);
     } catch (error) {
         console.error('Error loading flights from MongoDB:', error);
         return []; // Return empty array on error
     }
+}
+
+/**
+ * Convert time in HH:MM format to minutes for comparison
+ * @param {string} timeStr Time string in HH:MM format
+ * @returns {number} Total minutes
+ */
+function timeToMinutes(timeStr) {
+    // Default to 0 if time is invalid
+    if (!timeStr || !timeStr.includes(':')) return 0;
+    
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return (hours * 60) + minutes;
 }
 
 /**
