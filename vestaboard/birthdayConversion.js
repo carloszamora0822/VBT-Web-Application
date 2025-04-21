@@ -75,7 +75,7 @@ export function createBirthdayMatrix(firstName, date) {
   const processedDate = date.trim();
   
   // Add "HAPPY BIRTHDAY" text to row 1
-  const happyText = "HAPPY BIRTHDAY FROM 0Z1";
+  const happyText = "OZ1 WISHES";
   const happyCodes = stringToVestaCodes(centerString(happyText, 20));
   for (let i = 0; i < happyCodes.length; i++) {
     matrix[1][i + 1] = happyCodes[i];
@@ -88,7 +88,7 @@ export function createBirthdayMatrix(firstName, date) {
   }
   
   // Add "LETS CELEBRATE!" text to row 3
-  const celebrateText = "LETS CELEBRATE!";
+  const celebrateText = "A HAPPY BIRTHDAY!";
   const celebrateCodes = stringToVestaCodes(centerString(celebrateText, 20));
   for (let i = 0; i < celebrateCodes.length; i++) {
     matrix[3][i + 1] = celebrateCodes[i];
