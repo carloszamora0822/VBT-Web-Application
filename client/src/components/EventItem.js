@@ -6,7 +6,7 @@ function EventItem({ event, onDelete }) {
       <p>
         <strong>Date:</strong> {event.date} | <strong>Description:</strong> {event.description}
       </p>
-      <button onClick={onDelete} className="delete-btn">Delete</button>
+      <button onClick={onDelete} className="delete-btn">×</button>
     </div>
   );
 }

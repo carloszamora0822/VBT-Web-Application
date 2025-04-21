@@ -6,7 +6,7 @@ function FlightItem({ flight, onDelete }) {
       <p>
         <strong>Time:</strong> {flight.time} | <strong>Name:</strong> {flight.callsign} | <strong>Flight Type:</strong> {flight.type} | <strong>Flight Number:</strong> {flight.destination}
       </p>
-      <button onClick={onDelete} className="delete-btn">Delete</button>
+      <button onClick={onDelete} className="delete-btn">×</button>
     </div>
   );
 }
