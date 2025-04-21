@@ -99,7 +99,7 @@ function FlightForm({ addFlight }) {
         </select>
       </div>
       <div className="form-group">
-        <label htmlFor="destination">Flight Number:</label>
+        <label htmlFor="destination">Flight Tag:</label>
         <input
           type="text"
           id="destination"
