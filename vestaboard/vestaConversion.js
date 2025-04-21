@@ -76,14 +76,14 @@ export function createVestaMatrix(flights) {
         if (rowIndex >= 6) return;   // Don't exceed matrix bounds
         
         const timeStr = flight.time.padEnd(4);
-        const callStr = flight.callsign.toUpperCase().padEnd(6);
+        const tagStr = flight.callsign.toUpperCase().padEnd(6);  
         const typeStr = flight.type.toUpperCase().padEnd(3);
         const destStr = flight.destination.toUpperCase().padEnd(6);
 
         const row = [
             ...timeStr.split('').map(c => VESTA_CHARS[c] || 0),
             0,  // space
-            ...callStr.split('').map(c => VESTA_CHARS[c] || 0),
+            ...tagStr.split('').map(c => VESTA_CHARS[c] || 0),   
             0,  // space
             ...typeStr.split('').map(c => VESTA_CHARS[c] || 0),
             0,  // space

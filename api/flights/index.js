@@ -47,15 +47,44 @@ async function loadFlights() {
 }
 
 /**
- * Convert time in HH:MM format to minutes for comparison
- * @param {string} timeStr Time string in HH:MM format
+ * Convert time in military format (HH:MM or HHMM) to minutes for comparison
+ * @param {string} timeStr Time string in military format
  * @returns {number} Total minutes
  */
 function timeToMinutes(timeStr) {
-    // Default to 0 if time is invalid
-    if (!timeStr || !timeStr.includes(':')) return 0;
+    if (!timeStr) return Number.MAX_SAFE_INTEGER; // Invalid times go to the end
     
-    const [hours, minutes] = timeStr.split(':').map(Number);
+    // Handle multiple formats
+    let hours, minutes;
+    
+    // Format: HH:MM
+    if (timeStr.includes(':')) {
+        [hours, minutes] = timeStr.split(':').map(Number);
+    } 
+    // Format: HHMM
+    else if (timeStr.length === 4) {
+        hours = parseInt(timeStr.substring(0, 2), 10);
+        minutes = parseInt(timeStr.substring(2, 4), 10);
+    }
+    // Format: H:MM or HMM
+    else if (timeStr.length === 3) {
+        if (timeStr.includes(':')) {
+            [hours, minutes] = timeStr.split(':').map(Number);
+        } else {
+            hours = parseInt(timeStr.substring(0, 1), 10);
+            minutes = parseInt(timeStr.substring(1, 3), 10);
+        }
+    }
+    // Invalid format
+    else {
+        return Number.MAX_SAFE_INTEGER; // Invalid times go to the end
+    }
+    
+    // Validate
+    if (isNaN(hours) || isNaN(minutes) || hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+        return Number.MAX_SAFE_INTEGER; // Invalid times go to the end
+    }
+    
     return (hours * 60) + minutes;
 }
 

@@ -28,6 +28,7 @@ function App() {
   const [isUpdatingEmployee, setIsUpdatingEmployee] = useState(false);
   const [isUpdatingPilot, setIsUpdatingPilot] = useState(false);
   const [isUpdatingBirthday, setIsUpdatingBirthday] = useState(false);
+  const [rateLimitInfo, setRateLimitInfo] = useState({ isLimited: false, message: "No rate limit detected" });
 
   useEffect(() => {
     fetchFlights();
@@ -35,6 +36,25 @@ function App() {
     fetchEmployeeRecognition();
     fetchPrivatePilot();
     fetchBirthdays();
+  }, []);
+
+  useEffect(() => {
+    const fetchRateLimitStatus = async () => {
+      try {
+        const response = await fetch('/api/rate-limit-status');
+        if (response.ok) {
+          const data = await response.json();
+          setRateLimitInfo(data);
+        }
+      } catch (error) {
+        console.error('Error fetching rate limit status:', error);
+      }
+    };
+
+    fetchRateLimitStatus();
+    const intervalId = setInterval(fetchRateLimitStatus, 1000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   // Flight-related functions
@@ -716,6 +736,16 @@ function App() {
     <div className="App">
       <header className="app-header">
         <h1>VBT Vesta Portal</h1>
+        {rateLimitInfo.isLimited && (
+          <div className="rate-limit-warning">
+            <p>⚠️ {rateLimitInfo.message} ⚠️</p>
+            {rateLimitInfo.timeRemaining && (
+              <div className="countdown-timer">
+                Next update available in: {rateLimitInfo.timeRemaining} seconds
+              </div>
+            )}
+          </div>
+        )}
       </header>
       
       <div className="dashboard">

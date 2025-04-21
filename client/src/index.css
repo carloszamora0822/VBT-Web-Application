@@ -257,6 +257,41 @@ code {
   font-style: italic;
 }
 
+/* Rate Limit Warning Styles */
+.rate-limit-warning {
+  background-color: #fff3cd;
+  border: 2px solid #ffc107;
+  color: #856404;
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 5px;
+  text-align: center;
+  animation: pulse 2s infinite;
+}
+
+.rate-limit-warning p {
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+.countdown-timer {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 193, 7, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+  }
+}
+
 /* Responsive styling */
 @media (max-width: 768px) {
   .dashboard {
