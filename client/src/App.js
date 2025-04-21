@@ -5,6 +5,7 @@ import EventForm from './components/EventForm';
 import EventList from './components/EventList';
 import EmployeeRecognitionForm from './components/EmployeeRecognitionForm';
 import PrivatePilotForm from './components/PrivatePilotForm';
+import BirthdayForm from './components/BirthdayForm';
 
 console.log('[FILE USED] /client/src/App.js');
 
@@ -13,20 +14,24 @@ function App() {
   const [events, setEvents] = useState([]);
   const [employeeRecognition, setEmployeeRecognition] = useState({ firstName: '', lastName: '' });
   const [privatePilot, setPrivatePilot] = useState(null);
+  const [birthday, setBirthday] = useState({ firstName: '', date: '' });
   const [lastFlightUpdate, setLastFlightUpdate] = useState(null);
   const [lastEventUpdate, setLastEventUpdate] = useState(null);
   const [lastEmployeeUpdate, setLastEmployeeUpdate] = useState(null);
   const [lastPilotUpdate, setLastPilotUpdate] = useState(null);
+  const [lastBirthdayUpdate, setLastBirthdayUpdate] = useState(null);
   const [isUpdatingFlights, setIsUpdatingFlights] = useState(false);
   const [isUpdatingEvents, setIsUpdatingEvents] = useState(false);
   const [isUpdatingEmployee, setIsUpdatingEmployee] = useState(false);
   const [isUpdatingPilot, setIsUpdatingPilot] = useState(false);
+  const [isUpdatingBirthday, setIsUpdatingBirthday] = useState(false);
 
   useEffect(() => {
     fetchFlights();
     fetchEvents();
     fetchEmployeeRecognition();
     fetchPrivatePilot();
+    fetchBirthday();
   }, []);
 
   // Flight-related functions
@@ -521,6 +526,113 @@ function App() {
     }
   };
 
+  // Birthday-related functions
+  const fetchBirthday = async () => {
+    try {
+      console.log('Fetching birthday...');
+      const response = await fetch('/api/birthday');
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from birthday API: ${response.status} - ${errorText}`);
+        return; // Don't update state if we got an error response
+      }
+      
+      const data = await response.json();
+      console.log('Fetched birthday:', data);
+      
+      if (data && data.firstName !== undefined && data.date !== undefined) {
+        setBirthday(data);
+        if (data.firstName || data.date) setLastBirthdayUpdate(new Date());
+      } else {
+        console.error('Unexpected data format from birthday API:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching birthday:', error);
+      // Continue with current state - don't clear existing data on error
+    }
+  };
+
+  const addBirthday = async (birthdayData) => {
+    try {
+      console.log('Adding birthday:', birthdayData);
+      const response = await fetch('/api/birthday', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(birthdayData)
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from birthday API: ${response.status} - ${errorText}`);
+        return { success: false, message: `Server error: ${response.status}` };
+      }
+      
+      const data = await response.json();
+      console.log('Add birthday response:', data);
+      
+      // Update the state with the new data
+      if (data.success && data.birthday) {
+        setBirthday(data.birthday);
+        setLastBirthdayUpdate(new Date());
+      }
+      return data;
+    } catch (error) {
+      console.error('Error adding birthday:', error);
+      // Return a standardized error response object
+      return { 
+        success: false, 
+        message: 'Failed to connect to server. Please try again later.',
+        error: error.message
+      };
+    }
+  };
+
+  const updateVestaboardWithBirthday = async () => {
+    try {
+      console.log('Updating Vestaboard with birthday...');
+      setIsUpdatingBirthday(true);
+      
+      // Check if we have birthday to update
+      if (!birthday || !birthday.firstName || !birthday.date) {
+        alert('No birthday available to send to Vestaboard');
+        setIsUpdatingBirthday(false);
+        return;
+      }
+      
+      const response = await fetch('/api/birthday', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          updateVestaboardOnly: true  // Flag to indicate we're just updating the Vestaboard
+        })
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from birthday API: ${response.status} - ${errorText}`);
+        alert(`Failed to update Vestaboard: ${errorText}`);
+        setIsUpdatingBirthday(false);
+        return;
+      }
+      
+      const data = await response.json();
+      console.log('Update Vestaboard with birthday response:', data);
+      
+      if (data.success) {
+        setLastBirthdayUpdate(new Date());
+        alert('Vestaboard updated with birthday successfully');
+      } else {
+        alert('Failed to update Vestaboard: ' + (data.message || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error updating Vestaboard with birthday:', error);
+      alert('Error updating Vestaboard. Please try again later.');
+    } finally {
+      setIsUpdatingBirthday(false);
+    }
+  };
+
   // Helper functions for formatting
   const formatUpdateTime = (time) => {
     if (!time) return 'Never';
@@ -628,6 +740,27 @@ function App() {
             </button>
           </div>
           <PrivatePilotForm addPrivatePilot={addPrivatePilot} />
+        </div>
+      </div>
+      
+      <div className="dashboard tertiary-dashboard">
+        {/* Birthday Panel */}
+        <div className="panel birthday-panel">
+          <h2>Birthday</h2>
+          <div className="status-section">
+            <p>Last Vestaboard update: {formatUpdateTime(lastBirthdayUpdate)}</p>
+            <p className="current-value">
+              Current Birthday: {birthday?.firstName ? `${birthday.firstName} (${birthday.date})` : 'None'}
+            </p>
+            <button 
+              onClick={updateVestaboardWithBirthday} 
+              disabled={isUpdatingBirthday || !birthday?.firstName}
+              className="submit-btn"
+            >
+              {isUpdatingBirthday ? 'Updating...' : 'Update Vestaboard with Birthday'}
+            </button>
+          </div>
+          <BirthdayForm addBirthday={addBirthday} />
         </div>
       </div>
     </div>

@@ -174,14 +174,19 @@ export default async function handler(req, res) {
         try {
             // Check if this is just a Vestaboard update request
             if (req.body.updateVestaboardOnly === true) {
-                console.log('Received Vestaboard-only update request');
+                console.log('[TIMING] Received Vestaboard-only update request for events at', new Date().toISOString());
                 
                 // Get the current events from the database
+                const requestStartTime = new Date();
                 const currentEvents = await loadEvents();
+                console.log(`[TIMING] Database load took ${new Date() - requestStartTime}ms`);
                 
                 // Update Vestaboard with current events
                 try {
+                    console.log('[TIMING] Starting Vestaboard update at', new Date().toISOString());
+                    const vestaUpdateStartTime = new Date();
                     await updateVestaboardWithEvents(currentEvents);
+                    console.log(`[TIMING] Vestaboard update took ${new Date() - vestaUpdateStartTime}ms`);
                 } catch (vestaError) {
                     console.error('Vestaboard update error:', vestaError);
                     // Continue even if Vestaboard update fails
