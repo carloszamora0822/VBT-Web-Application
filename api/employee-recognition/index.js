@@ -169,12 +169,10 @@ export default async function handler(req, res) {
         try {
             // Check if this is just a Vestaboard update request
             if (req.body.updateVestaboardOnly === true) {
-                console.log('[TIMING] Received Vestaboard-only update request for employee recognition at', new Date().toISOString());
+                console.log('Received Vestaboard-only update request for employee recognition');
                 
                 // Get the current employee recognition from the database
-                const requestStartTime = new Date();
                 const currentEmployee = await loadEmployeeRecognition();
-                console.log(`[TIMING] Database load took ${new Date() - requestStartTime}ms`);
                 
                 if (!currentEmployee || !currentEmployee.firstName || !currentEmployee.lastName) {
                     return res.status(400).json({
@@ -185,10 +183,7 @@ export default async function handler(req, res) {
                 
                 // Update Vestaboard with current employee recognition
                 try {
-                    console.log('[TIMING] Starting Vestaboard update at', new Date().toISOString());
-                    const vestaUpdateStartTime = new Date();
                     const vestaUpdateSuccess = await updateVestaboardWithEmployee(currentEmployee);
-                    console.log(`[TIMING] Vestaboard update took ${new Date() - vestaUpdateStartTime}ms`);
                     
                     if (vestaUpdateSuccess) {
                         return res.status(200).json({

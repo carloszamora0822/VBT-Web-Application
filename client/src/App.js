@@ -6,6 +6,7 @@ import EventList from './components/EventList';
 import EmployeeRecognitionForm from './components/EmployeeRecognitionForm';
 import PrivatePilotForm from './components/PrivatePilotForm';
 import BirthdayForm from './components/BirthdayForm';
+import BirthdayList from './components/BirthdayList';
 
 console.log('[FILE USED] /client/src/App.js');
 
@@ -14,7 +15,9 @@ function App() {
   const [events, setEvents] = useState([]);
   const [employeeRecognition, setEmployeeRecognition] = useState({ firstName: '', lastName: '' });
   const [privatePilot, setPrivatePilot] = useState(null);
-  const [birthday, setBirthday] = useState({ firstName: '', date: '' });
+  const [birthdays, setBirthdays] = useState([]);
+  const [todaysBirthday, setTodaysBirthday] = useState(null);
+  const [isBirthdayToday, setIsBirthdayToday] = useState(false);
   const [lastFlightUpdate, setLastFlightUpdate] = useState(null);
   const [lastEventUpdate, setLastEventUpdate] = useState(null);
   const [lastEmployeeUpdate, setLastEmployeeUpdate] = useState(null);
@@ -31,7 +34,7 @@ function App() {
     fetchEvents();
     fetchEmployeeRecognition();
     fetchPrivatePilot();
-    fetchBirthday();
+    fetchBirthdays();
   }, []);
 
   // Flight-related functions
@@ -527,9 +530,26 @@ function App() {
   };
 
   // Birthday-related functions
-  const fetchBirthday = async () => {
+  const fetchBirthdays = async () => {
     try {
-      console.log('Fetching birthday...');
+      // First, check if there's a birthday today
+      console.log('Checking for birthdays today...');
+      const todayResponse = await fetch('/api/birthday?today=true');
+      
+      if (todayResponse.ok) {
+        const todayData = await todayResponse.json();
+        console.log('Birthday today check result:', todayData);
+        
+        setIsBirthdayToday(todayData.isBirthdayToday);
+        setTodaysBirthday(todayData.birthday);
+        
+        if (todayData.isBirthdayToday && todayData.birthday) {
+          setLastBirthdayUpdate(new Date());
+        }
+      }
+      
+      // Then fetch all birthdays
+      console.log('Fetching all birthdays...');
       const response = await fetch('/api/birthday');
       
       if (!response.ok) {
@@ -539,16 +559,15 @@ function App() {
       }
       
       const data = await response.json();
-      console.log('Fetched birthday:', data);
+      console.log('Fetched birthdays:', data);
       
-      if (data && data.firstName !== undefined && data.date !== undefined) {
-        setBirthday(data);
-        if (data.firstName || data.date) setLastBirthdayUpdate(new Date());
+      if (Array.isArray(data)) {
+        setBirthdays(data);
       } else {
         console.error('Unexpected data format from birthday API:', data);
       }
     } catch (error) {
-      console.error('Error fetching birthday:', error);
+      console.error('Error fetching birthdays:', error);
       // Continue with current state - don't clear existing data on error
     }
   };
@@ -572,9 +591,20 @@ function App() {
       console.log('Add birthday response:', data);
       
       // Update the state with the new data
-      if (data.success && data.birthday) {
-        setBirthday(data.birthday);
-        setLastBirthdayUpdate(new Date());
+      if (data.success) {
+        if (data.birthdays && Array.isArray(data.birthdays)) {
+          setBirthdays(data.birthdays);
+        }
+        
+        // If this is today's birthday, update that state too
+        if (data.birthday && data.vestaboardUpdated) {
+          setTodaysBirthday(data.birthday);
+          setIsBirthdayToday(true);
+          setLastBirthdayUpdate(new Date());
+        }
+        
+        // Refresh today's birthday status regardless
+        fetchBirthdays();
       }
       return data;
     } catch (error) {
@@ -587,15 +617,48 @@ function App() {
       };
     }
   };
+  
+  const deleteBirthday = async (id) => {
+    try {
+      console.log('Deleting birthday with ID:', id);
+      const response = await fetch(`/api/birthday?id=${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Error response from birthday API: ${response.status} - ${errorText}`);
+        return { success: false, message: `Server error: ${response.status}` };
+      }
+      
+      const data = await response.json();
+      console.log('Delete birthday response:', data);
+      
+      if (data.success && data.birthdays) {
+        setBirthdays(data.birthdays);
+        
+        // Refresh today's birthday status
+        fetchBirthdays();
+      } else {
+        throw new Error(data.message || 'Failed to delete birthday');
+      }
+    } catch (error) {
+      console.error('Error deleting birthday:', error);
+      alert('Error deleting birthday. Please try again.');
+    }
+  };
 
   const updateVestaboardWithBirthday = async () => {
     try {
-      console.log('Updating Vestaboard with birthday...');
+      console.log('Updating Vestaboard with today\'s birthday...');
       setIsUpdatingBirthday(true);
       
-      // Check if we have birthday to update
-      if (!birthday || !birthday.firstName || !birthday.date) {
-        alert('No birthday available to send to Vestaboard');
+      // Check if we have a birthday today
+      if (!isBirthdayToday || !todaysBirthday) {
+        alert('No birthday today to send to Vestaboard');
         setIsUpdatingBirthday(false);
         return;
       }
@@ -621,7 +684,7 @@ function App() {
       
       if (data.success) {
         setLastBirthdayUpdate(new Date());
-        alert('Vestaboard updated with birthday successfully');
+        alert('Vestaboard updated with today\'s birthday successfully');
       } else {
         alert('Failed to update Vestaboard: ' + (data.message || 'Unknown error'));
       }
@@ -658,7 +721,7 @@ function App() {
       <div className="dashboard">
         {/* Left side - Flights */}
         <div className="panel flights-panel">
-          <h2>Flight Management</h2>
+          <h2>Check Ride</h2>
           <div className="status-section">
             <p>Last Vestaboard flight update: {formatUpdateTime(lastFlightUpdate)}</p>
             <p className="note">
@@ -681,7 +744,7 @@ function App() {
         
         {/* Right side - Events */}
         <div className="panel events-panel">
-          <h2>Event Management</h2>
+          <h2>OZ1 CLUB EVENTS</h2>
           <div className="status-section">
             <p>Last Vestaboard event update: {formatUpdateTime(lastEventUpdate)}</p>
             <p className="note">
@@ -746,21 +809,33 @@ function App() {
       <div className="dashboard tertiary-dashboard">
         {/* Birthday Panel */}
         <div className="panel birthday-panel">
-          <h2>Birthday</h2>
+          <h2>Birthday Management</h2>
           <div className="status-section">
             <p>Last Vestaboard update: {formatUpdateTime(lastBirthdayUpdate)}</p>
             <p className="current-value">
-              Current Birthday: {birthday?.firstName ? `${birthday.firstName} (${birthday.date})` : 'None'}
+              {isBirthdayToday 
+                ? <strong>Today's Birthday: {todaysBirthday?.firstName} ({todaysBirthday?.date})</strong>
+                : 'No birthdays today'}
             </p>
             <button 
               onClick={updateVestaboardWithBirthday} 
-              disabled={isUpdatingBirthday || !birthday?.firstName}
+              disabled={isUpdatingBirthday || !isBirthdayToday}
               className="submit-btn"
             >
               {isUpdatingBirthday ? 'Updating...' : 'Update Vestaboard with Birthday'}
             </button>
           </div>
-          <BirthdayForm addBirthday={addBirthday} />
+          <div className="birthday-management">
+            <div className="birthday-form-section">
+              <BirthdayForm addBirthday={addBirthday} />
+            </div>
+            <div className="birthday-list-section">
+              <BirthdayList 
+                birthdays={birthdays} 
+                deleteBirthday={deleteBirthday}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>

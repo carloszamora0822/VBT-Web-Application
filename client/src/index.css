@@ -1,5 +1,8 @@
 /* Place this file at: client/src/index.css */
 
+/* Import birthday styles */
+@import './styles/birthday.css';
+
 /* Basic airport-themed styling */
 body {
   margin: 0;
@@ -67,7 +70,15 @@ code {
   border-radius: 8px;
 }
 
-.employee-panel, .pilot-panel {
+/* Tertiary Dashboard Styles */
+.tertiary-dashboard {
+  margin-top: 20px;
+  background-color: #f0f7f4;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.employee-panel, .pilot-panel, .birthday-panel {
   background-color: white;
   height: 100%;
 }

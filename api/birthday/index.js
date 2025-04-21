@@ -5,30 +5,53 @@ import { getCollection } from '../../lib/mongodb';
 console.log('[FILE USED] /api/birthday/index.js');
 
 // In-memory cache for the current request
-let birthdayCache = null;
+let birthdaysCache = [];
 
 // Flag to track if we're currently updating the Vestaboard
 let isUpdatingVestaboard = false;
 
 /**
- * Load birthday from the database
+ * Format today's date as MM/DD
+ * @returns {string} Today's date in MM/DD format
  */
-async function loadBirthday() {
+function getTodayFormatted() {
+    const today = new Date();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${month}/${day}`;
+}
+
+/**
+ * Check if any of the stored birthdays is today
+ * @param {Array} birthdays Array of birthday objects
+ * @returns {Object|null} Birthday object if found, null otherwise
+ */
+function findTodaysBirthday(birthdays) {
+    const today = getTodayFormatted();
+    console.log(`Checking for birthdays on ${today}...`);
+    
+    return birthdays.find(birthday => birthday.date === today) || null;
+}
+
+/**
+ * Load birthdays from the database
+ */
+async function loadBirthdays() {
     try {
-        console.log('Loading birthday from MongoDB...');
-        const collection = await getCollection('birthday');
-        const record = await collection.findOne({}, { sort: { _id: -1 } });
+        console.log('Loading birthdays from MongoDB...');
+        const collection = await getCollection('birthdays');
+        const birthdays = await collection.find({}).sort({ _id: -1 }).toArray();
         
-        console.log(`Loaded birthday from MongoDB:`, record);
+        console.log(`Loaded ${birthdays.length} birthdays from MongoDB`);
         
-        // Return the record if found, or null if not
-        return record ? {
-            firstName: record.firstName || '',
-            date: record.date || ''
-        } : null;
+        // Transform from MongoDB document to birthday objects
+        return birthdays.map(doc => ({
+            firstName: doc.firstName || '',
+            date: doc.date || ''
+        }));
     } catch (error) {
-        console.error('Error loading birthday from MongoDB:', error);
-        return null; // Return null on error
+        console.error('Error loading birthdays from MongoDB:', error);
+        return []; // Return empty array on error
     }
 }
 
@@ -40,27 +63,51 @@ async function saveBirthday(birthday) {
     try {
         console.log(`Saving birthday to MongoDB:`, birthday);
         
-        const collection = await getCollection('birthday');
+        const collection = await getCollection('birthdays');
         
-        // Clear existing record and insert new one
-        await collection.deleteMany({});
-        
+        // Add the new birthday
         if (birthday && birthday.firstName && birthday.date) {
             await collection.insertOne({
                 firstName: birthday.firstName,
                 date: birthday.date,
                 createdAt: new Date()
             });
+            
+            // Refresh the cache
+            birthdaysCache = await loadBirthdays();
         }
         
-        console.log(`Saved birthday to MongoDB`);
+        console.log(`Saved birthday to MongoDB, total birthdays: ${birthdaysCache.length}`);
         
-        // Update the in-memory cache
-        birthdayCache = { ...birthday };
         return birthday;
     } catch (error) {
         console.error('Error saving birthday to MongoDB:', error);
-        return birthdayCache; // Return cached data on error
+        return null;
+    }
+}
+
+/**
+ * Remove a birthday from the database
+ * @param {string} id The ID of the birthday to remove
+ */
+async function deleteBirthday(id) {
+    try {
+        console.log(`Deleting birthday with ID: ${id}`);
+        
+        const collection = await getCollection('birthdays');
+        
+        // Delete the birthday by its ID
+        await collection.deleteOne({ _id: id });
+        
+        // Refresh the cache
+        birthdaysCache = await loadBirthdays();
+        
+        console.log(`Deleted birthday, remaining birthdays: ${birthdaysCache.length}`);
+        
+        return true;
+    } catch (error) {
+        console.error('Error deleting birthday from MongoDB:', error);
+        return false;
     }
 }
 
@@ -78,7 +125,7 @@ async function updateVestaboardWithBirthday(birthday) {
     try {
         // Set flag to prevent concurrent updates
         isUpdatingVestaboard = true;
-        console.log('[TIMING] Starting Vestaboard update with birthday:', JSON.stringify(birthday));
+        console.log('Starting Vestaboard update with birthday:', JSON.stringify(birthday));
 
         if (!birthday || !birthday.firstName || !birthday.date) {
             throw new Error('Missing birthday first name or date');
@@ -117,28 +164,30 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') return res.status(200).end();
 
     try {
-        // Always load birthday from database to ensure we have the latest data
-        birthdayCache = await loadBirthday();
+        // Always load birthdays from database to ensure we have the latest data
+        birthdaysCache = await loadBirthdays();
     } catch (error) {
-        console.error('Failed to load birthday:', error);
+        console.error('Failed to load birthdays:', error);
         // Continue with empty cache if database access fails
-        birthdayCache = null;
+        birthdaysCache = [];
     }
+
+    // Check if any of the stored birthdays is today
+    const todaysBirthday = findTodaysBirthday(birthdaysCache);
+    const isBirthdayToday = !!todaysBirthday;
+    console.log(`Is there a birthday today? ${isBirthdayToday ? 'YES' : 'NO'}`);
 
     // Check if this is a vestaboard matrix request
     if (req.query.format === 'vestaboard') {
         try {
-            // Load birthday from database
-            const birthday = await loadBirthday();
-            
-            if (!birthday || !birthday.firstName || !birthday.date) {
-                return res.status(400).json({ 
-                    error: 'No birthday data found' 
+            if (!isBirthdayToday) {
+                return res.status(404).json({ 
+                    error: 'No birthday today' 
                 });
             }
             
-            // Create Vestaboard matrix
-            const matrix = createBirthdayMatrix(birthday.firstName, birthday.date);
+            // Create Vestaboard matrix for today's birthday
+            const matrix = createBirthdayMatrix(todaysBirthday.firstName, todaysBirthday.date);
             
             // Return the matrix
             return res.status(200).json(matrix);
@@ -150,50 +199,53 @@ export default async function handler(req, res) {
         }
     }
 
-    // Get birthday
+    // Get all birthdays or today's birthday info
     if (req.method === 'GET') {
         try {
-            console.log('GET request received, returning birthday:', birthdayCache);
-            return res.status(200).json(birthdayCache || { firstName: '', date: '' });
+            if (req.query.today === 'true') {
+                // Return just today's birthday if requested
+                console.log('GET request received for today\'s birthday');
+                return res.status(200).json({
+                    isBirthdayToday,
+                    birthday: todaysBirthday,
+                    count: birthdaysCache.length
+                });
+            } else {
+                // Return all birthdays by default
+                console.log('GET request received, returning all birthdays:', birthdaysCache.length);
+                return res.status(200).json(birthdaysCache);
+            }
         } catch (error) {
-            console.error('Error in GET birthday:', error);
+            console.error('Error in GET birthdays:', error);
             return res.status(500).json({ 
-                message: 'Failed to fetch birthday',
+                message: 'Failed to fetch birthdays',
                 success: false
             });
         }
     }
 
-    // Save birthday
+    // Add new birthday
     if (req.method === 'POST') {
         try {
             // Check if this is just a Vestaboard update request
             if (req.body.updateVestaboardOnly === true) {
-                console.log('[TIMING] Received Vestaboard-only update request for birthday at', new Date().toISOString());
+                console.log('Received Vestaboard-only update request for birthday');
                 
-                // Get the current birthday from the database
-                const requestStartTime = new Date();
-                const currentBirthday = await loadBirthday();
-                console.log(`[TIMING] Database load took ${new Date() - requestStartTime}ms`);
-                
-                if (!currentBirthday || !currentBirthday.firstName || !currentBirthday.date) {
-                    return res.status(400).json({
+                if (!isBirthdayToday) {
+                    return res.status(404).json({
                         success: false,
-                        message: 'No birthday data found to display on Vestaboard'
+                        message: 'No birthday today to display on Vestaboard'
                     });
                 }
                 
-                // Update Vestaboard with current birthday
+                // Update Vestaboard with today's birthday
                 try {
-                    console.log('[TIMING] Starting Vestaboard update at', new Date().toISOString());
-                    const vestaUpdateStartTime = new Date();
-                    const vestaUpdateSuccess = await updateVestaboardWithBirthday(currentBirthday);
-                    console.log(`[TIMING] Vestaboard update took ${new Date() - vestaUpdateStartTime}ms`);
+                    const vestaUpdateSuccess = await updateVestaboardWithBirthday(todaysBirthday);
                     
                     if (vestaUpdateSuccess) {
                         return res.status(200).json({
                             success: true,
-                            message: 'Vestaboard updated successfully with birthday'
+                            message: 'Vestaboard updated successfully with today\'s birthday'
                         });
                     } else {
                         return res.status(500).json({
@@ -210,8 +262,8 @@ export default async function handler(req, res) {
                 }
             }
             
-            // This is a standard update request for birthday
-            console.log('Received birthday update:', req.body);
+            // This is a standard request to add a birthday
+            console.log('Received birthday addition request:', req.body);
             
             // Validate required fields
             if (!req.body.firstName) {
@@ -237,9 +289,12 @@ export default async function handler(req, res) {
             // Save to the database
             const savedBirthday = await saveBirthday(birthday);
             
-            // Update Vestaboard if requested
+            // Check if the newly added birthday is today
+            const newBirthdayIsToday = savedBirthday && savedBirthday.date === getTodayFormatted();
+            
+            // Update Vestaboard if requested and it's a birthday today
             let vestaboardUpdateSuccess = false;
-            if (req.body.updateVestaboard === true) {
+            if (req.body.updateVestaboard === true && newBirthdayIsToday) {
                 vestaboardUpdateSuccess = await updateVestaboardWithBirthday(savedBirthday);
             }
             
@@ -248,7 +303,8 @@ export default async function handler(req, res) {
                 success: true,
                 message: 'Birthday saved successfully',
                 vestaboardUpdated: vestaboardUpdateSuccess,
-                birthday: savedBirthday
+                birthday: savedBirthday,
+                birthdays: birthdaysCache
             });
             
         } catch (error) {
@@ -256,6 +312,42 @@ export default async function handler(req, res) {
             return res.status(500).json({ 
                 success: false,
                 message: 'Failed to save birthday',
+                error: error.message
+            });
+        }
+    }
+
+    // Delete birthday
+    if (req.method === 'DELETE') {
+        try {
+            const id = req.query.id;
+            
+            if (!id) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Birthday ID is required'
+                });
+            }
+            
+            const success = await deleteBirthday(id);
+            
+            if (success) {
+                return res.status(200).json({
+                    success: true,
+                    message: 'Birthday deleted successfully',
+                    birthdays: birthdaysCache
+                });
+            } else {
+                return res.status(500).json({
+                    success: false,
+                    message: 'Failed to delete birthday'
+                });
+            }
+        } catch (error) {
+            console.error('Error in DELETE birthday:', error);
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to delete birthday',
                 error: error.message
             });
         }

@@ -20,6 +20,13 @@ function BirthdayForm({ addBirthday }) {
       return;
     }
     
+    // Validate date format (MM/DD)
+    const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])$/;
+    if (!dateRegex.test(date.trim())) {
+      setError('Date must be in MM/DD format (e.g., 04/21)');
+      return;
+    }
+    
     setError('');
     setIsSubmitting(true);
     
@@ -83,7 +90,7 @@ function BirthdayForm({ addBirthday }) {
           className="submit-btn"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Saving...' : 'Save Birthday'}
+          {isSubmitting ? 'Saving...' : 'Add Birthday'}
         </button>
       </form>
     </div>
