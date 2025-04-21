@@ -87,11 +87,11 @@ export function createBirthdayMatrix(firstName, date) {
     matrix[2][i + 1] = nameCodes[i];
   }
   
-  // Add "BORN ON" text to row 3
-  const bornText = "BORN ON";
-  const bornCodes = stringToVestaCodes(centerString(bornText, 20));
-  for (let i = 0; i < bornCodes.length; i++) {
-    matrix[3][i + 1] = bornCodes[i];
+  // Add "LETS CELEBRATE!" text to row 3
+  const celebrateText = "LETS CELEBRATE!";
+  const celebrateCodes = stringToVestaCodes(centerString(celebrateText, 20));
+  for (let i = 0; i < celebrateCodes.length; i++) {
+    matrix[3][i + 1] = celebrateCodes[i];
   }
   
   // Add date to row 4
