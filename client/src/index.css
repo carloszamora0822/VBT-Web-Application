@@ -1,7 +1,10 @@
 /* Place this file at: client/src/index.css */
 
-/* Import birthday styles */
+/* Import styles */
 @import './styles/birthday.css';
+@import './styles/modern-ui.css';
+@import './styles/components.css';
+@import './styles/animations.css';
 
 /* Basic airport-themed styling */
 body {
