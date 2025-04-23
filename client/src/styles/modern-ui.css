@@ -59,7 +59,7 @@
 /* Base Styles */
 body {
   font-family: var(--font-sans);
-  background-color: var(--neutral-100);
+  background: linear-gradient(135deg, #f0f4f8, #e6eef6);
   color: var(--neutral-800);
   margin: 0;
   line-height: 1.5;
@@ -122,7 +122,7 @@ body {
 .panel {
   flex: 1;
   min-width: 320px;
-  background: white;
+  background: linear-gradient(to bottom right, #ffffff, #f8fafd);
   border-radius: var(--border-radius-xl);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-lg);
@@ -499,18 +499,23 @@ textarea {
 .secondary-dashboard {
   padding: var(--spacing-lg);
   border-radius: var(--border-radius-xl);
-  background: linear-gradient(135deg, #f0f4f8, #e6f3fc);
+  background: linear-gradient(135deg, #edf2f7, #e2eaf3);
   margin-top: var(--spacing-xl);
 }
 
 .tertiary-dashboard {
   padding: var(--spacing-lg);
   border-radius: var(--border-radius-xl);
-  background: linear-gradient(135deg, #f0f7f4, #e5f5ee);
+  background: linear-gradient(135deg, #edf2fb, #e2eeff);
   margin-top: var(--spacing-xl);
 }
 
 /* Special Panel Styling */
+.employee-panel, .pilot-panel, .birthday-panel {
+  background: linear-gradient(to bottom right, #ffffff, #f8fafd);
+  height: 100%;
+}
+
 .employee-panel::before {
   background: linear-gradient(180deg, var(--secondary), var(--info));
 }

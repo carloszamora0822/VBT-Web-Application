@@ -2,7 +2,7 @@
 
 /* Card Components */
 .card {
-  background: white;
+  background: linear-gradient(to bottom right, #ffffff, #f8fafd);
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -29,7 +29,7 @@
 
 .card-footer {
   padding: 1rem 1.5rem;
-  background: #f9fafb;
+  background: linear-gradient(to bottom, #f8f9fa, #f0f4f8);
   border-top: 1px solid #e5e7eb;
 }
 
@@ -86,6 +86,7 @@
   padding: 1rem;
   border-bottom: 1px solid #e5e7eb;
   transition: background-color 0.2s ease;
+  background: linear-gradient(to right, #ffffff, #f8fafd);
 }
 
 .data-item:last-child {
@@ -93,7 +94,7 @@
 }
 
 .data-item:hover {
-  background-color: #f9fafb;
+  background: linear-gradient(to right, #f0f4f8, #e6eef6);
 }
 
 .data-item-content {
@@ -255,20 +256,21 @@ input:checked + .slider:before {
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
   .card {
-    background: #1f1f23;
+    background: linear-gradient(to bottom right, #1f1f23, #27272a);
   }
   
   .card-footer {
-    background: #27272a;
+    background: linear-gradient(to bottom, #27272a, #3f3f46);
     border-top-color: #3f3f46;
   }
   
   .data-item {
     border-bottom-color: #3f3f46;
+    background: linear-gradient(to right, #1f1f23, #27272a);
   }
   
   .data-item:hover {
-    background-color: #27272a;
+    background: linear-gradient(to right, #27272a, #3f3f46);
   }
   
   .data-item-title {
