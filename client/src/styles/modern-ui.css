@@ -1,12 +1,12 @@
 /* Modern UI styling for VBT Application */
 
 :root {
-  /* Modern Color Palette */
-  --primary: #2563eb;        /* Royal Blue */
-  --primary-light: #3b82f6;  /* Lighter blue */
-  --primary-dark: #1d4ed8;   /* Darker blue */
-  --secondary: #8b5cf6;      /* Purple */
-  --accent: #f43f5e;         /* Rose/Pink */
+  /* Modern Color Palette - More Vibrant */
+  --primary: #4f46e5;        /* Indigo */
+  --primary-light: #818cf8;  /* Lighter indigo */
+  --primary-dark: #4338ca;   /* Darker indigo */
+  --secondary: #9333ea;      /* Purple */
+  --accent: #ec4899;         /* Pink */
   --success: #10b981;        /* Emerald */
   --warning: #f59e0b;        /* Amber */
   --danger: #ef4444;         /* Red */
@@ -59,12 +59,37 @@
 /* Base Styles */
 body {
   font-family: var(--font-sans);
-  background: linear-gradient(135deg, #f0f4f8, #e6eef6);
+  background: linear-gradient(135deg, #f8f9ff, #eef1ff);
   color: var(--neutral-800);
   margin: 0;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Add animated background effect */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 20% 35%, rgba(79, 70, 229, 0.15) 0%, transparent 25%),
+              radial-gradient(circle at 80% 10%, rgba(236, 72, 153, 0.1) 0%, transparent 20%);
+  z-index: -1;
+  animation: backgroundShift 15s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundShift {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
 }
 
 /* Reset focus styles */
@@ -122,7 +147,7 @@ body {
 .panel {
   flex: 1;
   min-width: 320px;
-  background: linear-gradient(to bottom right, #ffffff, #f8fafd);
+  background: linear-gradient(135deg, #ffffff, #f8fafd);
   border-radius: var(--border-radius-xl);
   box-shadow: var(--shadow-lg);
   padding: var(--spacing-lg);
@@ -130,6 +155,18 @@ body {
               box-shadow var(--transition-normal);
   position: relative;
   overflow: hidden;
+  animation: panelFadeIn 0.7s ease forwards;
+}
+
+@keyframes panelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .panel:hover {
@@ -149,6 +186,25 @@ body {
   border-bottom-left-radius: var(--border-radius-xl);
 }
 
+/* Add a subtle glow effect on panel hover */
+.panel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(79, 70, 229, 0.4), transparent 70%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+  border-radius: var(--border-radius-xl);
+}
+
+.panel:hover::after {
+  opacity: 0.1;
+}
+
 .panel h2 {
   margin-top: 0;
   margin-bottom: var(--spacing-lg);
@@ -157,6 +213,25 @@ body {
   color: var(--neutral-800);
   padding-bottom: var(--spacing-sm);
   border-bottom: 1px solid var(--neutral-200);
+  position: relative;
+  display: inline-block;
+}
+
+/* Add animated underline for headings */
+.panel h2::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  transition: width 0.4s ease;
+  border-radius: var(--border-radius-full);
+}
+
+.panel:hover h2::after {
+  width: 100%;
 }
 
 /* Status Sections */
@@ -185,11 +260,18 @@ body {
 
 /* Form Styling */
 .form-container, .form {
-  background-color: var(--neutral-50);
+  background-color: rgba(255, 255, 255, 0.5);
   padding: var(--spacing-lg);
   border-radius: var(--border-radius-lg);
   margin-bottom: var(--spacing-lg);
   border: 1px solid var(--neutral-200);
+  backdrop-filter: blur(8px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-container:hover, .form:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .form h3 {
@@ -271,12 +353,41 @@ textarea {
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
+  z-index: 1;
 }
 
 .submit-btn:hover {
   background: linear-gradient(135deg, var(--primary-dark), var(--primary));
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
+}
+
+/* Add animated shimmer effect */
+.submit-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  animation: shimmerButton 3s infinite;
+  z-index: -1;
+}
+
+@keyframes shimmerButton {
+  from {
+    transform: rotate(30deg) translateX(-100%);
+  }
+  to {
+    transform: rotate(30deg) translateX(100%);
+  }
 }
 
 .submit-btn:active {
@@ -288,28 +399,6 @@ textarea {
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
-}
-
-.submit-btn::after {
-  content: '';
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
-  background-repeat: no-repeat;
-  background-position: 50%;
-  transform: scale(10, 10);
-  opacity: 0;
-  transition: transform 0.5s, opacity 1s;
-}
-
-.submit-btn:active::after {
-  transform: scale(0, 0);
-  opacity: 0.3;
-  transition: 0s;
 }
 
 .delete-btn {
@@ -499,15 +588,60 @@ textarea {
 .secondary-dashboard {
   padding: var(--spacing-lg);
   border-radius: var(--border-radius-xl);
-  background: linear-gradient(135deg, #edf2f7, #e2eaf3);
+  background: linear-gradient(135deg, #f0f1ff, #e2e7ff);
   margin-top: var(--spacing-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add subtle animated pattern */
+.secondary-dashboard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 10% 10%, rgba(79, 70, 229, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 90% 90%, rgba(147, 51, 234, 0.1) 0%, transparent 20%);
+  opacity: 0.5;
+  z-index: -1;
+  animation: patternMove 30s infinite alternate ease-in-out;
+}
+
+@keyframes patternMove {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
 }
 
 .tertiary-dashboard {
   padding: var(--spacing-lg);
   border-radius: var(--border-radius-xl);
-  background: linear-gradient(135deg, #edf2fb, #e2eeff);
+  background: linear-gradient(135deg, #f0f7ff, #e2f1ff);
   margin-top: var(--spacing-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add subtle animated pattern */
+.tertiary-dashboard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 25%),
+    radial-gradient(circle at 20% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 25%);
+  opacity: 0.5;
+  z-index: -1;
+  animation: patternMove 25s infinite alternate-reverse ease-in-out;
 }
 
 /* Special Panel Styling */
@@ -590,7 +724,7 @@ textarea {
   }
 }
 
-/* Dark mode support */
+/* Dark mode support - updated with more vibrant dark theme */
 @media (prefers-color-scheme: dark) {
   :root {
     --neutral-50: #18181b;
@@ -606,36 +740,45 @@ textarea {
   }
   
   body {
-    background-color: #121212;
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
+  }
+  
+  body::before {
+    background: radial-gradient(circle at 20% 35%, rgba(139, 92, 246, 0.15) 0%, transparent 25%),
+                radial-gradient(circle at 80% 10%, rgba(236, 72, 153, 0.1) 0%, transparent 20%);
   }
   
   .panel {
-    background-color: #1f1f23;
+    background: linear-gradient(135deg, #1f2937, #111827);
+    border: 1px solid #374151;
   }
   
   .form-container, .form {
-    background-color: #27272a;
+    background-color: rgba(17, 24, 39, 0.7);
+    border-color: #374151;
   }
-  
-  .status-section {
-    background-color: #27272a;
-    border-color: #3f3f46;
-  }
-  
-  .flight-item {
-    background-color: #27272a;
-    border-color: #3f3f46;
-  }
-  
-  .flight-item:hover {
-    background-color: #3f3f46;
-  }
-  
-  .form-group input, 
-  .form-group select, 
-  .form-group textarea {
-    background-color: #27272a;
-    border-color: #3f3f46;
-    color: #f4f4f5;
-  }
+}
+
+/* Glow effects for elements */
+.glow-hover {
+  position: relative;
+  z-index: 1;
+}
+
+.glow-hover::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle closest-side, var(--primary-light), transparent);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  border-radius: inherit;
+}
+
+.glow-hover:hover::after {
+  opacity: 0.2;
 }
