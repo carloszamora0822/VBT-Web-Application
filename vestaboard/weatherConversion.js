@@ -13,6 +13,13 @@ function stringToVestaboardCodes(str) {
   return [...str].map(char => VESTABOARD_CHAR_CODES[char] ?? 0);
 }
 
+function padOrTruncate(arr, len, padValue = 0) {
+  if (!Array.isArray(arr)) arr = [];
+  if (arr.length > len) return arr.slice(0, len);
+  if (arr.length < len) return arr.concat(Array(len - arr.length).fill(padValue));
+  return arr;
+}
+
 export async function fetchWeatherData() {
   const apiKey = process.env.OPENWEATHER_API_KEY;
   const location = process.env.OPENWEATHER_LOCATION || 'Bentonville,US';
@@ -34,49 +41,60 @@ export async function fetchWeatherData() {
 
 // Returns the correct matrix for the weather condition, inserting temp/wind arrays
 export async function getWeatherMatrix() {
-  const { temperatureArray, windArray, description } = await fetchWeatherData();
-  // Matrix templates (24,24 are placeholders)
-  if (description.toLowerCase().includes('clear')) {
+  try {
+    const { temperatureArray, windArray, description } = await fetchWeatherData();
+    // Defensive: always pad/truncate arrays so rows are exactly 22
+    const tempArr = padOrTruncate(temperatureArray, 8); // e.g., 8 chars for temp
+    const windArr = padOrTruncate(windArray, 6); // e.g., 6 chars for wind
+    // Matrix templates
+    if (description.toLowerCase().includes('clear')) {
+      const matrix = [
+        padOrTruncate([0,0,0,0,65,65,65,65,65,65,0,0,0,0,0,0,0,0,0,0,0,0], 22),
+        padOrTruncate([0,0,65,65,65,64,64,64,64,65,65,65,0,0,0,19,21,14,14,25,0,0], 22),
+        padOrTruncate([0,65,65,64,64,64,63,63,64,64,64,65,65,0,0, ...tempArr, 4,5,7,0,0], 22),
+        padOrTruncate([65,65,64,64,63,63,63,63,63,63,64,64,65,65,0, ...windArr, 13,16,8,0,0], 22),
+        padOrTruncate([0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0], 22),
+        padOrTruncate([0,0,0,0,2,5,14,20,15,14,20,9,12,12,5,55,1,18,0,0,0,0], 22)
+      ];
+      return matrix;
+    }
+    if (description.toLowerCase().includes('clouds')) {
+      const matrix = [
+        padOrTruncate([0,0,0,0,0,0,0,0,69,69,69,69,0,0,0,0,0,0,0,0,0,0], 22),
+        padOrTruncate([3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0], 22),
+        padOrTruncate([...tempArr, 4,5,7,0,0,0,0,0,0,0,0,0,69,69,69,69,69,69,69,0], 22),
+        padOrTruncate([...windArr, 13,16,8,0,0,69,69,69,69,69,69,69,69,0,0,0,0,0,0,0,0], 22),
+        padOrTruncate([11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0], 22),
+        padOrTruncate([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69], 22)
+      ];
+      return matrix;
+    }
+    if (description.toLowerCase().includes('rain')) {
+      const matrix = [
+        padOrTruncate([0,0,0,0,0,0,0,0,69,69,69,69,0,0,0,0,0,0,0,0,0,0], 22),
+        padOrTruncate([3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0], 22),
+        padOrTruncate([...tempArr, 4,5,7,0,0,0,0,0,0,0,0,0,69,69,69,69,69,69,69,0], 22),
+        padOrTruncate([...windArr, 13,16,8,0,0,69,69,69,69,69,69,69,69,0,0,0,0,0,0,0,0], 22),
+        padOrTruncate([11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0], 22),
+        padOrTruncate([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69], 22)
+      ];
+      return matrix;
+    }
+    // Default fallback
     const matrix = [
-      [0,0,0,0,65,65,65,65,65,65,0,0,0,0,0,0,0,0,0,0,0,0],
-      [0,0,65,65,65,64,64,64,64,65,65,65,0,0,0,19,21,14,14,25,0,0],
-      [0,65,65,64,64,64,63,63,64,64,64,65,65,0,0, ...temperatureArray, 4,5,7,0,0],
-      [65,65,64,64,63,63,63,63,63,63,64,64,65,65,0, ...windArray, 13,16,8,0,0],
-      [0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0],
-      [0,0,0,0,2,5,14,20,15,14,20,9,12,12,5,55,1,18,0,0,0,0]
+      padOrTruncate([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 22),
+      padOrTruncate([0,0,0,0,0,23,5,1,20,8,5,18,0,0,0,0,0,0,0,0,0,0], 22),
+      padOrTruncate([0,0, ...tempArr, 62,6,0,0,23,9,14,4,28, ...windArr, 0,13,16,8,0,0,0], 22),
+      padOrTruncate([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 22),
+      padOrTruncate([0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0], 22),
+      padOrTruncate([0,0,0,0,2,5,14,20,15,14,22,9,12,12,5,55,1,18,0,0,0,0], 22)
     ];
     return matrix;
+  } catch (error) {
+    // Log error for debugging
+    console.error('[WeatherMatrixError]', error);
+    // Return a fallback matrix with an error message
+    const errorRow = padOrTruncate(stringToVestaboardCodes('WEATHER ERROR'), 22, 0);
+    return [errorRow, ...Array(5).fill(padOrTruncate([], 22, 0))];
   }
-  if (description.toLowerCase().includes('clouds')) {
-    const matrix = [
-      [0,0,0,0,0,0,0,0,69,69,69,69,0,0,0,0,0,0,0,0,0,0],
-      [3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0],
-      [...temperatureArray, 4,5,7,0,0,0,0,0,0,0,0,0,69,69,69,69,69,69,69,0],
-      [...windArray, 13,16,8,0,0,69,69,69,69,69,69,69,69,0,0,0,0,0,0,0,0],
-      [11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69]
-    ];
-    return matrix;
-  }
-  if (description.toLowerCase().includes('rain')) {
-    const matrix = [
-      [0,0,0,0,0,0,0,0,69,69,69,69,0,0,0,0,0,0,0,0,0,0],
-      [3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0],
-      [...temperatureArray, 4,5,7,0,0,0,0,0,0,0,0,0,69,69,69,69,69,69,69,0],
-      [...windArray, 13,16,8,0,0,69,69,69,69,69,69,69,69,0,0,0,0,0,0,0,0],
-      [11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0],
-      [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69]
-    ];
-    return matrix;
-  }
-  // Default fallback
-  const matrix = [
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,23,5,1,20,8,5,18,0,0,0,0,0,0,0,0,0,0],
-    [0,0, ...temperatureArray, 62,6,0,0,23,9,14,4,28, ...windArray, 0,13,16,8,0,0,0],
-    [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0],
-    [0,0,0,0,2,5,14,20,15,14,22,9,12,12,5,55,1,18,0,0,0,0]
-  ];
-  return matrix;
 }
