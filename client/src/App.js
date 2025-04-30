@@ -774,7 +774,7 @@ function App() {
         
         {/* Right side - Events */}
         <div className="panel events-panel">
-          <h2>OZ1 CLUB EVENTS</h2>
+          <h2>OZ1 Club Upcoming Events</h2>
           <div className="status-section">
             <p>Last Vestaboard event update: {formatUpdateTime(lastEventUpdate)}</p>
             <p className="note">
