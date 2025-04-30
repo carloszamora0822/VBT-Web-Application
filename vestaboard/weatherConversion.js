@@ -20,6 +20,15 @@ function padOrTruncate(arr, len, padValue = 0) {
   return arr;
 }
 
+function insertAt(row, insertArr, index) {
+  // row: base array (length 22)
+  // insertArr: array to insert
+  // index: where to insert
+  const before = row.slice(0, index);
+  const after = row.slice(index + insertArr.length);
+  return before.concat(insertArr, after);
+}
+
 export async function fetchWeatherData() {
   const apiKey = process.env.OPENWEATHER_API_KEY;
   const location = process.env.OPENWEATHER_LOCATION || 'Bentonville,US';
@@ -43,57 +52,63 @@ export async function fetchWeatherData() {
 export async function getWeatherMatrix() {
   try {
     const { temperatureArray, windArray, description } = await fetchWeatherData();
-    // Defensive: always pad/truncate arrays so rows are exactly 22
-    const tempArr = padOrTruncate(temperatureArray, 8); // e.g., 8 chars for temp
-    const windArr = padOrTruncate(windArray, 6); // e.g., 6 chars for wind
-    // Matrix templates
+    const tempArr = padOrTruncate(temperatureArray, 8);
+    const windArr = padOrTruncate(windArray, 6);
     if (description.toLowerCase().includes('clear')) {
-      const matrix = [
-        padOrTruncate([0,0,0,0,65,65,65,65,65,65,0,0,0,0,0,0,0,0,0,0,0,0], 22),
-        padOrTruncate([0,0,65,65,65,64,64,64,64,65,65,65,0,0,0,19,21,14,14,25,0,0], 22),
-        padOrTruncate([0,65,65,64,64,64,63,63,64,64,64,65,65,0,0, ...tempArr, 4,5,7,0,0], 22),
-        padOrTruncate([65,65,64,64,63,63,63,63,63,63,64,64,65,65,0, ...windArr, 13,16,8,0,0], 22),
-        padOrTruncate([0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0], 22),
-        padOrTruncate([0,0,0,0,2,5,14,20,15,14,20,9,12,12,5,55,1,18,0,0,0,0], 22)
+      let matrix = [
+        Array(22).fill(0),
+        [0,0,65,65,65,64,64,64,64,65,65,65,0,0,0,19,21,14,14,25,0,0],
+        Array(22).fill(0),
+        Array(22).fill(0),
+        [0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0],
+        [0,0,0,0,2,5,14,20,15,14,20,9,12,12,5,55,1,18,0,0,0,0]
       ];
-      return matrix;
+      // Insert tempArr into row 2 at index 14
+      matrix[2] = insertAt(Array(22).fill(0), tempArr, 14);
+      // Insert windArr into row 3 at index 14
+      matrix[3] = insertAt(Array(22).fill(0), windArr, 14);
+      return matrix.map(row => padOrTruncate(row, 22));
     }
     if (description.toLowerCase().includes('clouds')) {
-      const matrix = [
-        padOrTruncate([0,0,0,0,0,0,0,0,69,69,69,69,0,0,0,0,0,0,0,0,0,0], 22),
-        padOrTruncate([3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0], 22),
-        padOrTruncate([...tempArr, 4,5,7,0,0,0,0,0,0,0,0,0,69,69,69,69,69,69,69,0], 22),
-        padOrTruncate([...windArr, 13,16,8,0,0,69,69,69,69,69,69,69,69,0,0,0,0,0,0,0,0], 22),
-        padOrTruncate([11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0], 22),
-        padOrTruncate([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69], 22)
+      let matrix = [
+        Array(22).fill(0),
+        [3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0],
+        Array(22).fill(0),
+        Array(22).fill(0),
+        [11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69]
       ];
-      return matrix;
+      matrix[2] = insertAt(Array(22).fill(0), tempArr, 2); // Insert tempArr at index 2
+      matrix[3] = insertAt(Array(22).fill(0), windArr, 2); // Insert windArr at index 2
+      return matrix.map(row => padOrTruncate(row, 22));
     }
     if (description.toLowerCase().includes('rain')) {
-      const matrix = [
-        padOrTruncate([0,0,0,0,0,0,0,0,69,69,69,69,0,0,0,0,0,0,0,0,0,0], 22),
-        padOrTruncate([3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0], 22),
-        padOrTruncate([...tempArr, 4,5,7,0,0,0,0,0,0,0,0,0,69,69,69,69,69,69,69,0], 22),
-        padOrTruncate([...windArr, 13,16,8,0,0,69,69,69,69,69,69,69,69,0,0,0,0,0,0,0,0], 22),
-        padOrTruncate([11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0], 22),
-        padOrTruncate([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69], 22)
+      let matrix = [
+        Array(22).fill(0),
+        [3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0],
+        Array(22).fill(0),
+        Array(22).fill(0),
+        [11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0],
+        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69]
       ];
-      return matrix;
+      matrix[2] = insertAt(Array(22).fill(0), tempArr, 2);
+      matrix[3] = insertAt(Array(22).fill(0), windArr, 2);
+      return matrix.map(row => padOrTruncate(row, 22));
     }
     // Default fallback
-    const matrix = [
-      padOrTruncate([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 22),
-      padOrTruncate([0,0,0,0,0,23,5,1,20,8,5,18,0,0,0,0,0,0,0,0,0,0], 22),
-      padOrTruncate([0,0, ...tempArr, 62,6,0,0,23,9,14,4,28, ...windArr, 0,13,16,8,0,0,0], 22),
-      padOrTruncate([0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], 22),
-      padOrTruncate([0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0], 22),
-      padOrTruncate([0,0,0,0,2,5,14,20,15,14,22,9,12,12,5,55,1,18,0,0,0,0], 22)
+    let matrix = [
+      Array(22).fill(0),
+      [0,0,0,0,0,23,5,1,20,8,5,18,0,0,0,0,0,0,0,0,0,0],
+      Array(22).fill(0),
+      Array(22).fill(0),
+      [0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0],
+      [0,0,0,0,2,5,14,20,15,14,22,9,12,12,5,55,1,18,0,0,0,0]
     ];
-    return matrix;
+    matrix[2] = insertAt(Array(22).fill(0), tempArr, 2);
+    matrix[2] = insertAt(matrix[2], windArr, 12); // Insert windArr after tempArr
+    return matrix.map(row => padOrTruncate(row, 22));
   } catch (error) {
-    // Log error for debugging
     console.error('[WeatherMatrixError]', error);
-    // Return a fallback matrix with an error message
     const errorRow = padOrTruncate(stringToVestaboardCodes('WEATHER ERROR'), 22, 0);
     return [errorRow, ...Array(5).fill(padOrTruncate([], 22, 0))];
   }
