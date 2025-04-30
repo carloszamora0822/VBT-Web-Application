@@ -1,6 +1,6 @@
 // Weather Conversion Logic for Vestaboard Matrix
 // Consistent with existing conversion modules (e.g., birthdayConversion.js)
-import fetch from 'node-fetch';
+// Use native fetch (Node.js 18+) - no import needed
 
 const VESTABOARD_CHAR_CODES = {
   "0": 36, "1": 27, "2": 28, "3": 29, "4": 30,
