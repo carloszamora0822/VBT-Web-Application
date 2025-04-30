@@ -65,61 +65,18 @@ export async function getWeatherMatrix() {
     console.log('[getWeatherMatrix] temperatureArray:', temperatureArray, 'windArray:', windArray, 'description:', description);
     const tempArr = padOrTruncate(temperatureArray, 8);
     const windArr = padOrTruncate(windArray, 6);
-    if (description.toLowerCase().includes('clear')) {
-      let matrix = [
-        Array(22).fill(0),
-        [0,0,65,65,65,64,64,64,64,65,65,65,0,0,0,19,21,14,14,25,0,0],
-        Array(22).fill(0),
-        Array(22).fill(0),
-        [0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0],
-        [0,0,0,0,2,5,14,20,15,14,20,9,12,12,5,55,1,18,0,0,0,0]
-      ];
-      matrix[2] = insertAt(Array(22).fill(0), tempArr, 14);
-      matrix[3] = insertAt(Array(22).fill(0), windArr, 14);
-      console.log('[getWeatherMatrix] matrix:', matrix);
-      return matrix.map(row => padOrTruncate(row, 22));
-    }
-    if (description.toLowerCase().includes('clouds')) {
-      let matrix = [
-        Array(22).fill(0),
-        [3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0],
-        Array(22).fill(0),
-        Array(22).fill(0),
-        [11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69]
-      ];
-      matrix[2] = insertAt(Array(22).fill(0), tempArr, 2);
-      matrix[3] = insertAt(Array(22).fill(0), windArr, 2);
-      console.log('[getWeatherMatrix] matrix:', matrix);
-      return matrix.map(row => padOrTruncate(row, 22));
-    }
-    if (description.toLowerCase().includes('rain')) {
-      let matrix = [
-        Array(22).fill(0),
-        [3,12,15,21,4,25,0,69,69,69,69,69,69,0,0,69,69,69,69,69,0,0],
-        Array(22).fill(0),
-        Array(22).fill(0),
-        [11,22,2,20,0,0,69,69,69,69,69,69,69,69,69,0,0,69,69,69,69,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,69,69,69,69,69]
-      ];
-      matrix[2] = insertAt(Array(22).fill(0), tempArr, 2);
-      matrix[3] = insertAt(Array(22).fill(0), windArr, 2);
-      console.log('[getWeatherMatrix] matrix:', matrix);
-      return matrix.map(row => padOrTruncate(row, 22));
-    }
-    // Default fallback
+
+    // Build the matrix with tempArr at start of row 2 and windArr at start of row 3
     let matrix = [
       Array(22).fill(0),
-      [0,0,0,0,0,23,5,1,20,8,5,18,0,0,0,0,0,0,0,0,0,0],
-      Array(22).fill(0),
-      Array(22).fill(0),
-      [0,0,0,0,23,5,12,3,15,13,5,0,20,15,0,22,2,20,0,0,0,0],
-      [0,0,0,0,2,5,14,20,15,14,22,9,12,12,5,55,1,18,0,0,0,0]
+      [3, 12, 15, 21, 4, 25, 0, 69, 69, 69, 69, 69, 69, 0, 0, 69, 69, 69, 69, 69, 0, 0],
+      padOrTruncate(tempArr, 22),
+      padOrTruncate(windArr, 22),
+      [11, 22, 2, 20, 0, 0, 69, 69, 69, 69, 69, 69, 69, 69, 69, 0, 0, 69, 69, 69, 69, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 69, 69, 69, 69]
     ];
-    matrix[2] = insertAt(Array(22).fill(0), tempArr, 2);
-    matrix[2] = insertAt(matrix[2], windArr, 12);
     console.log('[getWeatherMatrix] matrix:', matrix);
-    return matrix.map(row => padOrTruncate(row, 22));
+    return matrix;
   } catch (error) {
     console.error('[WeatherMatrixError]', error);
     const errorRow = padOrTruncate(stringToVestaboardCodes('WEATHER ERROR'), 22, 0);
