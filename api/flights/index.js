@@ -305,40 +305,89 @@ export default async function handler(req, res) {
     // Delete flight
     if (req.method === 'DELETE') {
         try {
-            const index = parseInt(req.url.split('/').pop());
+            const parts = req.url.split('/');
+            const lastPart = parts[parts.length - 1];
             
-            if (isNaN(index) || index < 0 || index >= flightsCache.length) {
-                return res.status(400).json({ 
-                    success: false,
-                    message: 'Invalid index'
+            // Check if we have an ID parameter
+            if (lastPart.includes('?id=')) {
+                const id = lastPart.split('?id=')[1];
+                console.log('Deleting flight with ID:', id);
+                
+                try {
+                    const { ObjectId } = require('mongodb');
+                    const objectId = new ObjectId(id);
+                    
+                    // Get collection and delete the document
+                    const collection = await getCollection('flights');
+                    const result = await collection.deleteOne({ _id: objectId });
+                    
+                    if (result.deletedCount === 0) {
+                        return res.status(404).json({ 
+                            success: false,
+                            message: 'Flight not found'
+                        });
+                    }
+                    
+                    // Reload the flights after deletion
+                    const updatedFlights = await loadFlights();
+                    
+                    // Always update Vestaboard after deletion
+                    try {
+                        await updateVestaboardWithFlights(updatedFlights);
+                    } catch (vestaError) {
+                        console.error('Vestaboard update error on delete:', vestaError);
+                        // Continue even if Vestaboard update fails
+                    }
+                    
+                    return res.status(200).json({
+                        success: true,
+                        flights: updatedFlights
+                    });
+                } catch (error) {
+                    console.error('Error parsing ObjectId:', error);
+                    return res.status(400).json({ 
+                        success: false,
+                        message: 'Invalid ID format'
+                    });
+                }
+            } 
+            // Backward compatibility for index-based deletion
+            else {
+                const index = parseInt(lastPart);
+                
+                if (isNaN(index) || index < 0 || index >= flightsCache.length) {
+                    return res.status(400).json({ 
+                        success: false,
+                        message: 'Invalid index'
+                    });
+                }
+
+                const updatedFlights = [...flightsCache];
+                const deletedFlight = updatedFlights[index];
+                updatedFlights.splice(index, 1);
+                console.log('Deleted flight at index', index, ':', deletedFlight);
+                
+                // Save updated flights list to database
+                try {
+                    await saveFlights(updatedFlights);
+                } catch (dbError) {
+                    console.error('Database save error on delete:', dbError);
+                    // Continue with the local changes even if database save fails
+                }
+                
+                // Always update Vestaboard after deletion
+                try {
+                    await updateVestaboardWithFlights(updatedFlights);
+                } catch (vestaError) {
+                    console.error('Vestaboard update error on delete:', vestaError);
+                    // Continue even if Vestaboard update fails
+                }
+                
+                return res.status(200).json({
+                    success: true,
+                    flights: updatedFlights
                 });
             }
-
-            const updatedFlights = [...flightsCache];
-            const deletedFlight = updatedFlights[index];
-            updatedFlights.splice(index, 1);
-            console.log('Deleted flight at index', index, ':', deletedFlight);
-            
-            // Save updated flights list to database
-            try {
-                await saveFlights(updatedFlights);
-            } catch (dbError) {
-                console.error('Database save error on delete:', dbError);
-                // Continue with the local changes even if database save fails
-            }
-            
-            // Always update Vestaboard after deletion
-            try {
-                await updateVestaboardWithFlights(updatedFlights);
-            } catch (vestaError) {
-                console.error('Vestaboard update error on delete:', vestaError);
-                // Continue even if Vestaboard update fails
-            }
-            
-            return res.status(200).json({
-                success: true,
-                flights: updatedFlights
-            });
         } catch (error) {
             console.error('Failed to delete flight:', error);
             return res.status(500).json({ 

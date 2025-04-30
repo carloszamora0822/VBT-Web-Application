@@ -9,9 +9,9 @@ function EventList({ events, deleteEvent }) {
         {events.length > 0 ? (
           events.map((event, index) => (
             <EventItem
-              key={index}
+              key={event._id || index}
               event={event}
-              onDelete={() => deleteEvent(index)}
+              onDelete={() => deleteEvent(event._id)}
             />
           ))
         ) : (

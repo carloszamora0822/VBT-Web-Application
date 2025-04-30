@@ -119,10 +119,10 @@ function App() {
     }
   };
 
-  const deleteFlight = async (index) => {
+  const deleteFlight = async (id) => {
     try {
-      console.log('Deleting flight at index:', index);
-      const response = await fetch(`/api/flights/${index}`, {
+      console.log('Deleting flight with ID:', id);
+      const response = await fetch(`/api/flights?id=${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
@@ -246,10 +246,10 @@ function App() {
     }
   };
 
-  const deleteEvent = async (index) => {
+  const deleteEvent = async (id) => {
     try {
-      console.log('Deleting event at index:', index);
-      const response = await fetch(`/api/events/${index}`, {
+      console.log('Deleting event with ID:', id);
+      const response = await fetch(`/api/events?id=${id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'

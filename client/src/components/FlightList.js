@@ -9,9 +9,9 @@ function FlightList({ flights, deleteFlight }) {
                 {flights.length > 0 ? (
                     flights.map((flight, index) => (
                         <FlightItem
-                            key={index}
+                            key={flight._id || index}
                             flight={flight}
-                            onDelete={() => deleteFlight(index)}
+                            onDelete={() => deleteFlight(flight._id)}
                         />
                     ))
                 ) : (
