@@ -40,8 +40,14 @@ function insertAt(row, insertArr, index) {
 function replaceFirstPair(row, replacementArr, placeholder = 36) {
   for (let i = 0; i < row.length - 1; i++) {
     if (row[i] === placeholder && row[i + 1] === placeholder) {
-      for (let j = 0; j < replacementArr.length && i + j < row.length; j++) {
-        row[i + j] = replacementArr[j];
+      if (replacementArr.length === 1) {
+        // Only replace the second placeholder for right-align
+        row[i + 1] = replacementArr[0];
+      } else {
+        // Replace both (or as many as fit)
+        for (let j = 0; j < replacementArr.length && i + j < row.length; j++) {
+          row[i + j] = replacementArr[j];
+        }
       }
       break;
     }
@@ -85,7 +91,7 @@ export async function getWeatherMatrix() {
       [36, 36, 4, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 69, 69, 69, 69, 69, 69, 0],
       [36, 36, 13, 16, 8, 0, 0, 69, 69, 69, 69, 69, 69, 69, 0, 0, 0, 0, 0, 0, 0, 0],
       [11, 22, 2, 20, 0, 0, 69, 69, 69, 69, 69, 69, 69, 69, 69, 0, 0, 69, 69, 69, 69, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 69, 69, 69, 69]
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 69, 69, 69, 69, 69]
     ];
     const clearTemplate = [
       [0, 0, 0, 0, 65, 65, 65, 65, 65, 65, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
