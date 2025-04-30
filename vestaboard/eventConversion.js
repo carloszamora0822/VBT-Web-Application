@@ -64,8 +64,23 @@ export function createEventMatrix(events) {
     if (i < 22) matrix[0][i] = titleCodes[i];
   }
   
+  // Sort events by date (MM/DD format)
+  const sortedEvents = [...events].sort((a, b) => {
+    // Parse dates (MM/DD format)
+    const [aMonth, aDay] = (a.date || '').split('/').map(Number);
+    const [bMonth, bDay] = (b.date || '').split('/').map(Number);
+    
+    // Compare months first
+    if (aMonth !== bMonth) {
+      return aMonth - bMonth;
+    }
+    
+    // If months are the same, compare days
+    return aDay - bDay;
+  });
+  
   // Add events (up to 5)
-  const eventsToShow = events.slice(0, 5);
+  const eventsToShow = sortedEvents.slice(0, 5);
   for (let i = 0; i < eventsToShow.length; i++) {
     const event = eventsToShow[i];
     const rowIndex = i + 1; // Start at row 1 (0-indexed) right after header

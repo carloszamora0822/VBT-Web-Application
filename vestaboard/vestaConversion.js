@@ -68,16 +68,43 @@ export function createVestaMatrix(flights) {
     const header = `CHECKRIDES ${getFormattedDate()}`.split('').map(char => VESTA_CHARS[char.toUpperCase()] || 0);
     matrix[0] = [...header, ...Array(22 - header.length).fill(0)];
     
-    // No divider line - removed to allow for 5 items
-
-    // add flights - now starting at row 1 instead of row 2
-    flights.slice(0, 5).forEach((flight, index) => {
-        const rowIndex = index + 1;  // Start from row 1 right after header
-        if (rowIndex >= 6) return;   // Don't exceed matrix bounds
+    // Sort flights by time
+    const sortedFlights = [...flights].sort((a, b) => {
+        // Convert time string to minutes for comparison
+        const timeToMinutes = (timeStr) => {
+            if (!timeStr) return -1; // Handle undefined/empty times
+            
+            // Parse HH:MM format
+            const parts = timeStr.split(':');
+            if (parts.length === 2) {
+                const hour = parseInt(parts[0], 10);
+                const minute = parseInt(parts[1], 10);
+                
+                if (!isNaN(hour) && !isNaN(minute)) {
+                    return hour * 60 + minute;
+                }
+            }
+            
+            return -1; // Invalid format
+        };
         
-        const timeStr = flight.time.padEnd(4);
-        const tagStr = flight.callsign.toUpperCase().padEnd(6);  
-        const typeStr = flight.type.toUpperCase().padEnd(3);
+        const aTime = timeToMinutes(a.time);
+        const bTime = timeToMinutes(b.time);
+        
+        return aTime - bTime; // Ascending by time
+    });
+
+    // Display up to 5 flights
+    sortedFlights.slice(0, 5).forEach((flight, index) => {
+        // +1 to skip header row
+        const rowIndex = index + 1;
+        
+        // Skip if we exceed the matrix bounds
+        if (rowIndex >= 6) return;
+        
+        const timeStr = flight.time.padEnd(5);
+        const tagStr = flight.callsign.toUpperCase().padEnd(5);
+        const typeStr = flight.type.toUpperCase().padEnd(4);
         const destStr = flight.destination.toUpperCase().padEnd(6);
 
         const row = [
