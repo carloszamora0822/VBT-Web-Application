@@ -1,9 +1,7 @@
 {
     "name": "my-flight-app",
     "version": "1.0.0",
-    "private": true,
-    "type": "module",
-    "scripts": {
+    "private": true,    "scripts": {
         "dev": "concurrently \"npm run start:client\" \"npm run start:server\"",
         "start:client": "cd client && npm start",
         "start:server": "cd server && npm run dev",
