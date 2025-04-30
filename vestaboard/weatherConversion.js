@@ -15,7 +15,7 @@ function stringToVestaboardCodes(str) {
 
 export async function fetchWeatherData() {
   const apiKey = process.env.OPENWEATHER_API_KEY;
-  const location = process.env.OPENWEATHER_LOCATION || 'Austin,US';
+  const location = process.env.OPENWEATHER_LOCATION || 'Bentonville,US';
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&units=imperial&appid=${apiKey}`;
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Weather API error: ${response.status}`);
