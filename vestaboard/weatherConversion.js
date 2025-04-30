@@ -36,10 +36,10 @@ function insertAt(row, insertArr, index) {
   return result;
 }
 
-// Helper: Replace first pair of 24,24 with replacementArr
-function replaceFirstPair(row, replacementArr) {
+// Helper: Replace first pair of placeholder (default 36) with replacementArr
+function replaceFirstPair(row, replacementArr, placeholder = 36) {
   for (let i = 0; i < row.length - 1; i++) {
-    if (row[i] === 24 && row[i + 1] === 24) {
+    if (row[i] === placeholder && row[i + 1] === placeholder) {
       for (let j = 0; j < replacementArr.length && i + j < row.length; j++) {
         row[i + j] = replacementArr[j];
       }
@@ -78,12 +78,12 @@ export async function getWeatherMatrix() {
     console.log('[getWeatherMatrix] temperatureArray:', temperatureArray, 'windArray:', windArray, 'description:', description);
     const tempArr = temperatureArray;
     const windArr = windArray;
-    // Weather templates
+    // Weather templates (using 36 as the placeholder)
     const cloudyTemplate = [
       [0, 0, 0, 0, 0, 0, 0, 0, 69, 69, 69, 69, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       [3, 12, 15, 21, 4, 25, 0, 69, 69, 69, 69, 69, 69, 0, 0, 69, 69, 69, 69, 69, 0, 0],
       [36, 36, 4, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 69, 69, 69, 69, 69, 69, 0],
-      [36, 36, 13, 16, 8, 0, 0, 69, 69, 69, 69, 69, 69, 69, 0, 0, 0, 0, 0, 0, 0, 0], 
+      [36, 36, 13, 16, 8, 0, 0, 69, 69, 69, 69, 69, 69, 69, 0, 0, 0, 0, 0, 0, 0, 0],
       [11, 22, 2, 20, 0, 0, 69, 69, 69, 69, 69, 69, 69, 69, 69, 0, 0, 69, 69, 69, 69, 0],
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 69, 69, 69, 69, 69]
     ];
@@ -104,8 +104,8 @@ export async function getWeatherMatrix() {
       template = cloudyTemplate; // fallback
     }
     let matrix = template.map(row => [...row]);
-    matrix[2] = replaceFirstPair(matrix[2], tempArr);
-    matrix[3] = replaceFirstPair(matrix[3], windArr);
+    matrix[2] = replaceFirstPair(matrix[2], tempArr, 36);
+    matrix[3] = replaceFirstPair(matrix[3], windArr, 36);
     console.log('[getWeatherMatrix] matrix:', matrix);
     return matrix;
   } catch (error) {
