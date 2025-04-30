@@ -59,7 +59,7 @@ export function createEventMatrix(events) {
   const matrix = createEmptyMatrix();
   
   // Add title with "UPCOMING EVENTS"
-  const titleCodes = stringToVestaCodes('UPCOMING OZ1 EVENTS');
+  const titleCodes = stringToVestaCodes('UPCOMING FLY OZ EVENTS');
   for (let i = 0; i < titleCodes.length; i++) {
     if (i < 22) matrix[0][i] = titleCodes[i];
   }
