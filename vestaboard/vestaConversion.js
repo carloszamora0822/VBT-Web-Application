@@ -102,23 +102,25 @@ export function createVestaMatrix(flights) {
         // Skip if we exceed the matrix bounds
         if (rowIndex >= 6) return;
         
-        const timeStr = flight.time.padEnd(5);
-        const tagStr = flight.callsign.toUpperCase().padEnd(5);
-        const typeStr = flight.type.toUpperCase().padEnd(4);
-        const destStr = flight.destination.toUpperCase().padEnd(6);
-
-        const row = [
-            ...timeStr.split('').map(c => VESTA_CHARS[c] || 0),
-            0,  // space
-            ...tagStr.split('').map(c => VESTA_CHARS[c] || 0),   
-            0,  // space
-            ...typeStr.split('').map(c => VESTA_CHARS[c] || 0),
-            0,  // space
-            ...destStr.split('').map(c => VESTA_CHARS[c] || 0),
-            ...Array(22).fill(0)
-        ].slice(0, 22);
-
-        matrix[rowIndex] = row;
+        // Format with exact character counts for proper alignment:
+        // time (4 chars), space, name (6 chars), space, type (3 chars), space, tag (6 chars)
+        const timeStr = (flight.time || '').substring(0, 4).padEnd(4); // Exactly 4 chars
+        const nameStr = (flight.callsign || '').toUpperCase().substring(0, 6).padEnd(6); // Exactly 6 chars
+        const typeStr = (flight.type || '').toUpperCase().substring(0, 3).padEnd(3); // Exactly 3 chars
+        const tagStr = (flight.destination || '').toUpperCase().substring(0, 6).padEnd(6); // Exactly 6 chars
+        
+        // Create the formatted string with consistent spacing
+        const formattedStr = `${timeStr} ${nameStr} ${typeStr} ${tagStr}`;
+        
+        // Convert to Vestaboard character codes
+        const row = formattedStr.split('').map(c => VESTA_CHARS[c] || 0);
+        
+        // Ensure row is exactly 22 characters
+        if (row.length < 22) {
+            matrix[rowIndex] = [...row, ...Array(22 - row.length).fill(0)];
+        } else {
+            matrix[rowIndex] = row.slice(0, 22);
+        }
     });
 
     console.log('Created flight matrix:', JSON.stringify(matrix));
