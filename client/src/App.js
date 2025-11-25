@@ -18,11 +18,6 @@ function App() {
   const [birthdays, setBirthdays] = useState([]);
   const [todaysBirthday, setTodaysBirthday] = useState(null);
   const [isBirthdayToday, setIsBirthdayToday] = useState(false);
-  const [lastFlightUpdate, setLastFlightUpdate] = useState(null);
-  const [lastEventUpdate, setLastEventUpdate] = useState(null);
-  const [lastEmployeeUpdate, setLastEmployeeUpdate] = useState(null);
-  const [lastPilotUpdate, setLastPilotUpdate] = useState(null);
-  const [lastBirthdayUpdate, setLastBirthdayUpdate] = useState(null);
   const [isUpdatingFlights, setIsUpdatingFlights] = useState(false);
   const [isUpdatingEvents, setIsUpdatingEvents] = useState(false);
   const [isUpdatingEmployee, setIsUpdatingEmployee] = useState(false);
@@ -74,7 +69,6 @@ function App() {
       
       if (Array.isArray(data)) {
         setFlights(data);
-        setLastFlightUpdate(new Date());
       } else {
         console.error('Unexpected data format from flights API:', data);
       }
@@ -105,7 +99,6 @@ function App() {
       // Update the flights state with the new data
       if (data.success && data.flights) {
         setFlights(data.flights);
-        setLastFlightUpdate(new Date());
       }
       return data;
     } catch (error) {
@@ -140,7 +133,6 @@ function App() {
       
       if (data.success && data.flights) {
         setFlights(data.flights);
-        setLastFlightUpdate(new Date());
       } else {
         throw new Error(data.message || 'Failed to delete flight');
       }
@@ -171,7 +163,6 @@ function App() {
       console.log('Update Vestaboard with flights response:', data);
       
       if (data.success) {
-        setLastFlightUpdate(new Date());
         alert('Vestaboard updated with flights successfully');
       } else {
         alert('Failed to update Vestaboard with flights: ' + (data.message || 'Unknown error'));
@@ -201,7 +192,6 @@ function App() {
       
       if (Array.isArray(data)) {
         setEvents(data);
-        setLastEventUpdate(new Date());
       } else {
         console.error('Unexpected data format from events API:', data);
       }
@@ -232,7 +222,6 @@ function App() {
       // Update the events state with the new data
       if (data.success && data.events) {
         setEvents(data.events);
-        setLastEventUpdate(new Date());
       }
       return data;
     } catch (error) {
@@ -267,7 +256,6 @@ function App() {
       
       if (data.success && data.events) {
         setEvents(data.events);
-        setLastEventUpdate(new Date());
       } else {
         throw new Error(data.message || 'Failed to delete event');
       }
@@ -322,7 +310,6 @@ function App() {
       console.log('Update Vestaboard with events response:', data);
       
       if (data.success) {
-        setLastEventUpdate(new Date());
         alert('Vestaboard updated with events successfully');
       } else {
         alert('Failed to update Vestaboard with events: ' + (data.message || 'Unknown error'));
@@ -352,7 +339,6 @@ function App() {
       
       if (data && data.firstName !== undefined && data.lastName !== undefined) {
         setEmployeeRecognition(data);
-        if (data.firstName || data.lastName) setLastEmployeeUpdate(new Date());
       } else {
         console.error('Unexpected data format from employee recognition API:', data);
       }
@@ -383,7 +369,6 @@ function App() {
       // Update the state with the new data
       if (data.success && data.employee) {
         setEmployeeRecognition(data.employee);
-        setLastEmployeeUpdate(new Date());
       }
       return data;
     } catch (error) {
@@ -429,7 +414,6 @@ function App() {
       console.log('Update Vestaboard with employee recognition response:', data);
       
       if (data.success) {
-        setLastEmployeeUpdate(new Date());
         alert('Vestaboard updated with employee recognition successfully');
       } else {
         alert('Failed to update Vestaboard: ' + (data.message || 'Unknown error'));
@@ -459,7 +443,6 @@ function App() {
       
       if (data && data.name !== undefined) {
         setPrivatePilot(data);
-        if (data.name) setLastPilotUpdate(new Date());
       } else {
         console.error('Unexpected data format from private pilot API:', data);
       }
@@ -490,7 +473,6 @@ function App() {
       // Update the state with the new data
       if (data.success && data.pilot) {
         setPrivatePilot(data.pilot);
-        setLastPilotUpdate(new Date());
       }
       return data;
     } catch (error) {
@@ -536,7 +518,6 @@ function App() {
       console.log('Update Vestaboard with private pilot response:', data);
       
       if (data.success) {
-        setLastPilotUpdate(new Date());
         alert('Vestaboard updated with private pilot successfully');
       } else {
         alert('Failed to update Vestaboard: ' + (data.message || 'Unknown error'));
@@ -564,7 +545,6 @@ function App() {
         setTodaysBirthday(todayData.birthday);
         
         if (todayData.isBirthdayToday && todayData.birthday) {
-          setLastBirthdayUpdate(new Date());
         }
       }
       
@@ -620,7 +600,6 @@ function App() {
         if (data.birthday && data.vestaboardUpdated) {
           setTodaysBirthday(data.birthday);
           setIsBirthdayToday(true);
-          setLastBirthdayUpdate(new Date());
         }
         
         // Refresh today's birthday status regardless
@@ -703,7 +682,6 @@ function App() {
       console.log('Update Vestaboard with birthday response:', data);
       
       if (data.success) {
-        setLastBirthdayUpdate(new Date());
         alert('Vestaboard updated with today\'s birthday successfully');
       } else {
         alert('Failed to update Vestaboard: ' + (data.message || 'Unknown error'));
@@ -716,15 +694,6 @@ function App() {
     }
   };
 
-  // Helper functions for formatting
-  const formatUpdateTime = (time) => {
-    if (!time) return 'Never';
-    
-    return time.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
 
   // Format full name from first and last name
   const formatFullName = (firstName, lastName) => {
@@ -753,7 +722,6 @@ function App() {
         <div className="panel flights-panel">
           <h2>Check Ride</h2>
           <div className="status-section">
-            <p className="timestamp">Last update: {formatUpdateTime(lastFlightUpdate)}</p>
             <p className="note">
               (Limited to 5 flights. Newest entries will replace oldest ones.)
             </p>
@@ -776,7 +744,6 @@ function App() {
         <div className="panel events-panel">
           <h2>OZ1 Club Upcoming Events</h2>
           <div className="status-section">
-            <p className="timestamp">Last update: {formatUpdateTime(lastEventUpdate)}</p>
             <p className="note">
               (Limited to 5 events. Newest entries will replace oldest ones.)
             </p>
@@ -801,7 +768,6 @@ function App() {
         <div className="panel employee-panel">
           <h2>Employee Recognition</h2>
           <div className="status-section">
-            <p className="timestamp">Last update: {formatUpdateTime(lastEmployeeUpdate)}</p>
             <p className="current-value">
               Current Employee: {formatFullName(employeeRecognition?.firstName, employeeRecognition?.lastName)}
             </p>
@@ -820,7 +786,6 @@ function App() {
         <div className="panel pilot-panel">
           <h2>Private Pilot</h2>
           <div className="status-section">
-            <p className="timestamp">Last update: {formatUpdateTime(lastPilotUpdate)}</p>
             <p className="current-value">
               Current Pilot: {privatePilot?.name || 'None'}
             </p>
@@ -841,7 +806,6 @@ function App() {
         <div className="panel birthday-panel">
           <h2>Birthday Management</h2>
           <div className="status-section">
-            <p className="timestamp">Last update: {formatUpdateTime(lastBirthdayUpdate)}</p>
             <p className="current-value">
               {isBirthdayToday 
                 ? <strong>Today's Birthday: {todaysBirthday?.firstName} ({todaysBirthday?.date})</strong>
