@@ -110,7 +110,7 @@ input, select, textarea {
   font-size: 1rem;
   transition: border 0.2s, box-shadow 0.2s;
   background: #f8fafc;
-  color: #1e3a8a !important;
+  color: #000000 !important;
   outline: none;
 }
 input:focus, select:focus, textarea:focus {
