@@ -753,6 +753,7 @@ function App() {
         <div className="panel flights-panel">
           <h2>Check Ride</h2>
           <div className="status-section">
+            <p className="timestamp">Last update: {formatUpdateTime(lastFlightUpdate)}</p>
             <p className="note">
               (Limited to 5 flights. Newest entries will replace oldest ones.)
             </p>
@@ -775,6 +776,7 @@ function App() {
         <div className="panel events-panel">
           <h2>OZ1 Club Upcoming Events</h2>
           <div className="status-section">
+            <p className="timestamp">Last update: {formatUpdateTime(lastEventUpdate)}</p>
             <p className="note">
               (Limited to 5 events. Newest entries will replace oldest ones.)
             </p>
@@ -799,6 +801,7 @@ function App() {
         <div className="panel employee-panel">
           <h2>Employee Recognition</h2>
           <div className="status-section">
+            <p className="timestamp">Last update: {formatUpdateTime(lastEmployeeUpdate)}</p>
             <p className="current-value">
               Current Employee: {formatFullName(employeeRecognition?.firstName, employeeRecognition?.lastName)}
             </p>
@@ -817,6 +820,7 @@ function App() {
         <div className="panel pilot-panel">
           <h2>Private Pilot</h2>
           <div className="status-section">
+            <p className="timestamp">Last update: {formatUpdateTime(lastPilotUpdate)}</p>
             <p className="current-value">
               Current Pilot: {privatePilot?.name || 'None'}
             </p>
@@ -837,6 +841,7 @@ function App() {
         <div className="panel birthday-panel">
           <h2>Birthday Management</h2>
           <div className="status-section">
+            <p className="timestamp">Last update: {formatUpdateTime(lastBirthdayUpdate)}</p>
             <p className="current-value">
               {isBirthdayToday 
                 ? <strong>Today's Birthday: {todaysBirthday?.firstName} ({todaysBirthday?.date})</strong>
