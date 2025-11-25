@@ -2,16 +2,16 @@
 
 body {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%, #f0e7fa 100%);
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
   font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
-  color: #23272f;
+  color: #1e3a8a;
 }
 
 /* Main app container - add color and depth */
 .app-container {
-  background: linear-gradient(120deg, #f0e7fa 0%, #e0c3fc 100%);
+  background: linear-gradient(120deg, #eff6ff 0%, #dbeafe 100%);
   border-radius: 24px;
-  box-shadow: 0 8px 32px rgba(79,70,229,0.08);
+  box-shadow: 0 8px 32px rgba(37,99,235,0.08);
   padding: 2rem 1rem;
   margin: 2rem auto;
   max-width: 1100px;
@@ -19,10 +19,10 @@ body {
 
 /* Card Components */
 .card {
-  background: linear-gradient(120deg, #f8fafc 60%, #e0e7ff 100%);
+  background: linear-gradient(120deg, #f8fafc 60%, #dbeafe 100%);
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 8px 24px -3px rgba(79, 70, 229, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 24px -3px rgba(37, 99, 235, 0.10), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
   transition: all 0.3s cubic-bezier(.4,2,.3,1);
   margin-bottom: 1.5rem;
   position: relative;
@@ -32,14 +32,14 @@ body {
 
 .card-header {
   padding: 1.2rem 1.7rem;
-  background: linear-gradient(90deg, #6366f1 0%, #a21caf 100%);
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
   color: #fff;
   font-weight: 700;
   font-size: 1.1rem;
   letter-spacing: 0.01em;
   position: relative;
   overflow: hidden;
-  border-bottom: 2px solid #e0e7ff;
+  border-bottom: 2px solid #dbeafe;
 }
 
 .card-footer {
@@ -85,20 +85,20 @@ body {
 
 /* Buttons - bold and modern */
 .button, button, .btn {
-  background: linear-gradient(90deg, #6366f1 0%, #a21caf 100%);
+  background: linear-gradient(90deg, #2563eb 0%, #1d4ed8 100%);
   color: #fff;
   font-weight: 600;
   border: none;
   border-radius: 999px;
   padding: 0.7em 1.5em;
-  box-shadow: 0 2px 8px rgba(99,102,241,0.15);
+  box-shadow: 0 2px 8px rgba(37,99,235,0.15);
   transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
   cursor: pointer;
   font-size: 1rem;
 }
 .button:hover, button:hover, .btn:hover {
-  background: linear-gradient(90deg, #a21caf 0%, #6366f1 100%);
-  box-shadow: 0 6px 20px rgba(162,28,175,0.12);
+  background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
+  box-shadow: 0 6px 20px rgba(29,78,216,0.12);
   transform: translateY(-2px) scale(1.03);
 }
 
